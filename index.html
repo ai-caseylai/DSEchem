@@ -211,6 +211,33 @@ a{color:var(--pri-l);text-decoration:none}
 }
 
 footer{text-align:center;padding:30px 16px;color:var(--dim);font-size:11px;border-top:1px solid var(--bdr);margin-top:40px}
+
+/* AI Tutor Chat */
+.ai-toggle{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--pri),var(--acc));border:none;cursor:pointer;font-size:24px;z-index:1000;box-shadow:0 4px 20px rgba(108,92,231,.4);transition:.3s;display:flex;align-items:center;justify-content:center}
+.ai-toggle:hover{transform:scale(1.1)}
+.ai-box{position:fixed;bottom:90px;right:20px;width:min(380px,calc(100vw - 32px));height:min(520px,calc(100vh - 120px));background:var(--card);border:1px solid var(--bdr);border-radius:16px;z-index:1000;display:none;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,.4);overflow:hidden}
+.ai-box.open{display:flex;animation:fadeIn .3s}
+.ai-header{padding:14px 16px;background:linear-gradient(135deg,var(--pri),#4a3f8a);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.ai-header h3{font-size:14px;font-weight:700;color:#fff;flex:1}
+.ai-header span{font-size:11px;color:rgba(255,255,255,.6)}
+.ai-close{background:none;border:none;color:#fff;font-size:18px;cursor:pointer;padding:4px}
+.ai-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.ai-msg{max-width:85%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.7;white-space:pre-wrap}
+.ai-msg.bot{background:var(--card2);color:var(--txt);align-self:flex-start;border-bottom-left-radius:4px}
+.ai-msg.user{background:var(--pri);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.ai-typing{font-size:12px;color:var(--dim);padding:4px 12px;align-self:flex-start}
+.ai-typing span{animation:blink 1.4s infinite}
+.ai-typing span:nth-child(2){animation-delay:.2s}
+.ai-typing span:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,60%,100%{opacity:.3}30%{opacity:1}}
+.ai-input{display:flex;gap:8px;padding:12px;border-top:1px solid var(--bdr);flex-shrink:0}
+.ai-input input{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--bdr);border-radius:10px;padding:10px 14px;color:var(--txt);font-size:13px;outline:none}
+.ai-input input:focus{border-color:var(--pri)}
+.ai-input button{background:var(--pri);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer;font-size:13px;white-space:nowrap}
+.ai-input button:hover{opacity:.9}
+.ai-suggestions{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 8px}
+.ai-sug{background:rgba(108,92,231,.15);color:var(--pri-l);border:1px solid rgba(108,92,231,.3);border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;transition:.2s}
+.ai-sug:hover{background:rgba(108,92,231,.25)}
 </style>
 </head>
 <body data-lang="zh">
@@ -243,6 +270,7 @@ footer{text-align:center;padding:30px 16px;color:var(--dim);font-size:11px;borde
   <button class="nav-tab" data-tab="flash">🃏<span class="zh-only">閃卡</span><span class="en-only">Flashcards</span></button>
   <button class="nav-tab" data-tab="phases">📚<span class="zh-only">課題</span><span class="en-only">Topics</span></button>
   <button class="nav-tab" data-tab="checklist">✅<span class="zh-only">清單</span><span class="en-only">Checklist</span></button>
+  <button class="nav-tab" data-tab="aitutor">🤖<span class="zh-only">AI 老師</span><span class="en-only">AI Tutor</span></button>
 </div>
 
 <div class="container">
@@ -859,6 +887,99 @@ footer{text-align:center;padding:30px 16px;color:var(--dim);font-size:11px;borde
         <span class="zh-only">把上面的轉化路線圖<strong>畫在一張 A4 紙上</strong>，貼在書桌前。每天早上看一遍，3 天後你就能不看不畫出來。另外，記住碳數的前綴：<strong>Meth(1) Eth(2) Prop(3) But(4) Pent(5) Hex(6)</strong></span>
         <span class="en-only">Draw the conversion map above on <strong>one A4 sheet</strong> and stick it on your desk. Review it every morning — in 3 days you'll draw it from memory. Also memorise: <strong>Meth(1) Eth(2) Prop(3) But(4) Pent(5) Hex(6)</strong></span>
       </div>
+
+      <h4>🔬 <span class="zh-only">加成反應 vs 取代反應 vs 消除反應</span><span class="en-only">🔬 Addition vs Substitution vs Elimination</span></h4>
+      <div class="concept-visual" style="text-align:left;font-size:12px">
+        <div style="border:2px solid var(--acc);border-radius:8px;padding:10px;margin-bottom:6px">
+          <strong style="color:var(--acc)">加成反應 Addition</strong><br>
+          <span class="zh-only">雙鍵打開，加入新原子。不飽和→飽和。只有 Alkene/Alkyne 能發生。</span><span class="en-only">Double bond opens, new atoms added. Unsaturated→saturated. Only alkenes/alkynes.</span><br>
+          CH₂=CH₂ + Br₂ → CH₂BrCH₂Br <span class="zh-only">（褪色測試！）</span><span class="en-only">(decolourisation test!)</span>
+        </div>
+        <div style="border:2px solid var(--pri);border-radius:8px;padding:10px;margin-bottom:6px">
+          <strong style="color:var(--pri)">取代反應 Substitution</strong><br>
+          <span class="zh-only">一個原子/基團被另一個替換。Alkane 的特徵反應。</span><span class="en-only">One atom/group replaced by another. Characteristic reaction of alkanes.</span><br>
+          CH₄ + Cl₂ → CH₃Cl + HCl <span class="zh-only">（紫外光引發）</span><span class="en-only">(UV light initiated)</span>
+        </div>
+        <div style="border:2px solid var(--dn);border-radius:8px;padding:10px">
+          <strong style="color:var(--dn)">消除反應 Elimination</strong><br>
+          <span class="zh-only">Alcohol 在濃 H₂SO₄ 加熱下失去 H₂O 變成 Alkene。飽和→不飽和。</span><span class="en-only">Alcohol loses H₂O with conc. H₂SO₄ + heat → alkene. Saturated→unsaturated.</span><br>
+          CH₃CH₂OH → CH₂=CH₂ + H₂O <span class="zh-only">（濃 H₂SO₄，170°C）</span><span class="en-only">(conc. H₂SO₄, 170°C)</span>
+        </div>
+      </div>
+
+      <div class="callout callout-fire">
+        <strong>🔥 <span class="zh-only">DSE 必考：如何區分三種反應？</span><span class="en-only">DSE Must-know: How to distinguish 3 types?</span></strong><br>
+        <span class="zh-only"><strong>加成</strong> = 雙鍵消失（C=C 變 C-C）+ 不產生副產物<br>
+        <strong>取代</strong> = 原有基團被換走 + 產生副產物（如 HCl）<br>
+        <strong>消除</strong> = 產生雙鍵（C-C 變 C=C）+ 失去小分子（如 H₂O）</span>
+        <span class="en-only"><strong>Addition</strong> = double bond disappears + no by-product<br>
+        <strong>Substitution</strong> = original group replaced + by-product (e.g. HCl)<br>
+        <strong>Elimination</strong> = double bond formed + small molecule lost (e.g. H₂O)</span>
+      </div>
+
+      <h4>🇭🇰 <span class="zh-only">香港生活例子</span><span class="en-only">Hong Kong Real-Life Examples</span></h4>
+      <div class="concept-visual" style="text-align:left;font-size:13px">
+        <span class="zh-only">
+        • <strong>維他奶的有機化學：</strong>維他奶中的大豆蛋白含有氨基酸，氨基酸是兩性分子（amphoteric）——有 -NH₂（胺基，鹼性）和 -COOH（羧基，酸性）。香港人日日飲的維他奶就是有機化學的產物！<br>
+        • <strong>街市魚檔的「腥味」：</strong>魚腥味來自三甲胺（trimethylamine, (CH₃)₃N），是一種含氮的有機化合物。加檸檬汁（含檸檬酸）可以中和它——酸鹼中和的有機化學應用！<br>
+        • <strong>香港酒樓的酒釀：</strong>釀酒是發酵過程：C₆H₁₂O₆ → 2C₂H₅OH + 2CO₂（葡萄糖 → 乙醇 + 二氧化碳）。這是一個由酵母催化的有機反應，沒有氧氣參與（厭氧條件）。<br>
+        • <strong>塑膠回收三角標誌：</strong>香港三色回收桶中，PET（聚對苯二甲酸乙二醇酯）是加成聚合的產物。塑膠瓶底標有「1 PET」的就是這種材料。聚乙烯（PE）是另一種常見的加成聚合物：nCH₂=CH₂ → (-CH₂-CH₂-)ₙ。<br>
+        • <strong>蛋撻的香氣：</strong>烘焙時發生美拉德反應（Maillard reaction）——糖和氨基酸在高溫下反應產生棕色物質和香氣。雖然超出了 DSE 範圍，但本質是有機化學中的羰基-胺反應。<br>
+        • <strong>海洋公園清潔劑：</strong>肥皂（硬脂酸鈉 NaSt）的清潔原理：親水端（-COO⁻Na⁺）溶於水，疏水端（碳鏈）溶於油污。這就是酯水解（saponification）的應用：脂肪 + NaOH → 肥皂 + 甘油。
+        </span>
+        <span class="en-only">
+        • <strong>Vitasoy organic chemistry:</strong> Soy protein contains amino acids — amphoteric molecules with -NH₂ (basic) and -COOH (acidic). Vitasoy, a daily HK drink, is a product of organic chemistry!<br>
+        • <strong>Fish market "fishy smell":</strong> Trimethylamine (CH₃)₃N is an organic nitrogen compound. Adding lemon juice (citric acid) neutralises it — acid-base neutralisation applied to organic chemistry!<br>
+        • <strong>HK restaurant rice wine:</strong> Fermentation: C₆H₁₂O₆ → 2C₂H₅OH + 2CO₂. Yeast-catalysed organic reaction under anaerobic conditions.<br>
+        • <strong>Plastic recycling symbols:</strong> PET bottles (labelled "1 PET") are addition polymers. Polyethylene (PE): nCH₂=CH₂ → (-CH₂-CH₂-)ₙ. Another common addition polymer.<br>
+        • <strong>Egg tart aroma:</strong> Maillard reaction during baking — sugar + amino acid react at high temperature. Essentially a carbonyl-amine organic reaction (beyond DSE scope but conceptually linked).<br>
+        • <strong>Saponification:</strong> Soap (NaSt) cleaning: hydrophilic end (-COO⁻Na⁺) dissolves in water, hydrophobic end (carbon chain) dissolves in oil. Fat + NaOH → soap + glycerol.
+        </span>
+      </div>
+
+      <h4>🏛️ <span class="zh-only">典故：Wöhler 打破「生命力」學說 + 乙烯的發現</span><span class="en-only">🏛️ Story: Wöhler Breaks "Vital Force" Theory + Discovery of Ethylene</span></h4>
+      <p><span class="zh-only"><strong>Friedrich Wöhler（1800-1882）</strong>是德國化學家。1828 年，他做了一個改變化學史的實驗——<strong>用無機物合成尿素（urea, CO(NH₂)₂）</strong>。在那之前，科學家認為有機物只能由生物體內的「生命力（vital force）」產生，人類不可能在實驗室合成。Wöhler 用氰酸銨（NH₄OCN）加熱得到了尿素，一舉推翻了「生命力學說」，開創了現代有機化學！<br><br>
+      <strong>乙烯（Ethylene/Ethene）的發現：</strong>早在 1669 年，德國醫生 Johann Joachim Becher 就觀察到乙醇與硫酸反應會產生一種可燃氣體。直到 1795 年，荷蘭化學家 Johann Rudolph Deiman 和 Adriaan Paets van Troostwyk 才確認了乙烯的化學組成（C₂H₄）。有趣的是，水果催熟的原理正是乙烯——香蕉釋放乙烯加速自身成熟，所以把未熟的獼猴桃（奇異果）跟香蕉放在一起，獼猴桃會更快變軟！這就是為什麼香港的水果檔常用乙烯催熟水果。<br><br>
+      <strong>保鮮紙的秘密：</strong>保鮮紙（cling film）的主要成分是聚氯乙烯（PVC）或低密度聚乙烯（LDPE），都是加成聚合的產物。LDPE 的鏈是支鏈狀的，所以比較柔軟有彈性。</span>
+      <span class="en-only"><strong>Friedrich Wöhler (1800-1882)</strong> was a German chemist. In 1828, he performed an experiment that changed chemistry — <strong>synthesising urea (CO(NH₂)₂) from inorganic materials</strong>. Before this, scientists believed organic compounds could only be produced by a "vital force" in living organisms. Wöhler heated ammonium cyanate (NH₄OCN) to produce urea, overthrowing the "vital force theory" and founding modern organic chemistry!<br><br>
+      <strong>Discovery of Ethylene:</strong> In 1669, Johann Joachim Becher observed a flammable gas from ethanol + sulphuric acid. In 1795, Dutch chemists confirmed ethylene's composition (C₂H₄). Funnily, ethylene is what ripens fruit — bananas release ethylene to accelerate ripening. That's why HK fruit stalls use ethylene to ripen fruit!<br><br>
+      <strong>Cling film secret:</strong> Made from PVC or LDPE — both addition polymerisation products. LDPE chains are branched, making them flexible and stretchy.</span></p>
+
+      <h4>📊 <span class="zh-only">舊試卷分析：有機化學</span><span class="en-only">📊 Past Paper Analysis: Organic Chemistry</span></h4>
+      <div class="concept-visual" style="text-align:left;font-size:12px">
+        <span class="zh-only">
+        <strong>出題頻率：每年必考（100%）</strong><br><br>
+        <strong>最常見題型：</strong><br>
+        ① 官能團鑑定 + 命名 — 出現率 90%<br>
+        ② 反應路線推斷（給原料推產物）— 出現率 85%<br>
+        ③ 酯化反應方程式 — 出現率 70%<br>
+        ④ 加成聚合方程式 — 出現率 55%<br>
+        ⑤ Curly arrow 機制圖 — 出現率 45%（Paper 1B/2 高分題）<br><br>
+        <strong>近五年有機化學相關考題：</strong><br>
+        • 2024 DSE：MC Q22, Q31 / Paper 1B Q6 (esterification + naming)<br>
+        • 2023 DSE：MC Q19, Q28 / Paper 1B Q5 (reaction pathway + polymer)<br>
+        • 2022 DSE：MC Q21, Q34 / Paper 1B Q7 (functional group identification)<br>
+        • 2021 DSE：MC Q23, Q30 / Paper 1B Q4 (addition vs substitution)<br>
+        • 2020 DSE：MC Q20, Q35 / Paper 1B Q6 (curly arrow mechanism)<br><br>
+        <strong style="color:var(--gold)">⭐ 5** 必記：有機反應路線題一定要同時寫出 <strong>試劑（reagent）+ 條件（condition）+ 方程式</strong>。漏寫任何一個都扣分！</strong>
+        </span>
+        <span class="en-only">
+        <strong>Frequency: Every year (100%)</strong><br><br>
+        <strong>Most common types:</strong><br>
+        ① Functional group identification + naming — 90%<br>
+        ② Reaction pathway deduction — 85%<br>
+        ③ Esterification equations — 70%<br>
+        ④ Addition polymerisation — 55%<br>
+        ⑤ Curly arrow mechanisms — 45% (Paper 1B/2 high-mark questions)<br><br>
+        <strong>Recent 5 years organic questions:</strong><br>
+        • 2024: MC Q22, Q31 / Paper 1B Q6<br>
+        • 2023: MC Q19, Q28 / Paper 1B Q5<br>
+        • 2022: MC Q21, Q34 / Paper 1B Q7<br>
+        • 2021: MC Q23, Q30 / Paper 1B Q4<br>
+        • 2020: MC Q20, Q35 / Paper 1B Q6<br><br>
+        <strong style="color:var(--gold)">⭐ Always write reagent + condition + equation together. Missing any one costs marks!</strong>
+        </span>
+      </div>
     </div></div>
   </div>
 
@@ -895,9 +1016,115 @@ footer{text-align:center;padding:30px 16px;color:var(--dim);font-size:11px;borde
         </div>
       </div>
 
-      <div class="callout callout-star">
-        <strong>⭐ <span class="zh-only">5** 答題模板（每次都要這樣寫！）</span><span class="en-only">5** Answer Template (Write this every time!)</span></strong><br>
-        "When [factor] increases, the particles have [more/less] [kinetic energy / collisions per unit time]. This leads to an increase in the frequency of <strong>effective collisions</strong>. Hence, the rate of reaction <strong>increases</strong>."
+      <h4>📊 <span class="zh-only">Maxwell-Boltzmann 分佈曲線 — 5** 必備</span><span class="en-only">📊 Maxwell-Boltzmann Distribution Curve — 5** Essential</span></h4>
+      <div class="concept-visual" style="text-align:left;font-size:12px">
+        <div style="border:2px solid var(--pri);border-radius:8px;padding:10px;margin-bottom:8px">
+          <strong style="color:var(--pri)">曲線解讀：</strong><br>
+          <span class="zh-only">• X 軸 = 分子動能 (KE)，Y 軸 = 分子數目<br>
+          • 曲線下面積 = 總分子數（不變！）<br>
+          • <strong style="color:var(--dn)">Ea（活化能）</strong>右邊的面積 = 能量 ≥ Ea 的分子數 = 可以有效碰撞的分子<br>
+          • 最可能的動能（曲線頂峰）≠ 平均動能（平均在頂峰右邊）</span>
+          <span class="en-only">• X-axis = molecular KE, Y-axis = number of molecules<br>
+          • Area under curve = total molecules (constant!)<br>
+          • Area to the right of <strong style="color:var(--dn)">Ea</strong> = molecules with energy ≥ Ea = can effectively collide<br>
+          • Most probable KE (peak) ≠ mean KE (mean is to the right of peak)</span>
+        </div>
+        <div style="border:2px solid var(--acc);border-radius:8px;padding:10px;margin-bottom:8px">
+          <strong style="color:var(--acc)">溫度升高時曲線變化：</strong><br>
+          <span class="zh-only">• 曲線向右移（更高 KE）+ 變矮變寬<br>
+          • Ea 右邊面積<strong style="color:var(--acc)">增加</strong> → 更多分子能量 ≥ Ea → 有效碰撞↑ → 速率↑<br>
+          • 這就是碰撞理論的<strong>圖像解釋</strong>！DSE 常考你畫曲線變化！</span>
+          <span class="en-only">• Curve shifts right (higher KE) + becomes shorter and wider<br>
+          • Area right of Ea <strong style="color:var(--acc)">increases</strong> → more molecules with energy ≥ Ea → rate↑<br>
+          • This is the graphical explanation of collision theory! DSE loves testing this!</span>
+        </div>
+        <div style="border:2px solid var(--gold);border-radius:8px;padding:10px">
+          <strong style="color:var(--gold)">催化劑對曲線的影響：</strong><br>
+          <span class="zh-only">• 曲線<strong>不移動</strong>！催化劑不改變分子能量分佈<br>
+          • 但 Ea 向<strong>左移</strong>（降低活化能）→ Ea 右邊面積自然增加 → 速率↑<br>
+          • ⚠️ 陷阱：催化劑<strong>不改變</strong>曲線形狀，只是 Ea 的位置改變！</span>
+          <span class="en-only">• Curve <strong>does NOT shift</strong>! Catalyst doesn't change energy distribution<br>
+          • But Ea shifts <strong>left</strong> (lowered) → area right of Ea naturally increases → rate↑<br>
+          • ⚠️ Trap: catalyst does NOT change curve shape, only Ea position!</span>
+        </div>
+      </div>
+
+      <div class="callout callout-fire">
+        <strong>🔥 <span class="zh-only">DSE 經典陷阱：催化劑 vs 溫度</span><span class="en-only">DSE Classic Trap: Catalyst vs Temperature</span></strong><br>
+        <span class="zh-only">催化劑和升高溫度都能<strong>增加反應速率</strong>，但機制不同！<br>
+        • 催化劑：降低 Ea，不改變分子能量分佈<br>
+        • 溫度↑：不改變 Ea，但增加分子平均動能<br>
+        → DSE 常考：「Does a catalyst change the distribution curve?」答案是 <strong style="color:var(--acc)">NO</strong>！</span>
+        <span class="en-only">Catalyst and temperature increase both <strong>increase reaction rate</strong>, but mechanisms differ!<br>
+        • Catalyst: lowers Ea, doesn't change energy distribution<br>
+        • Temperature↑: doesn't change Ea, but increases average KE<br>
+        → DSE often asks: "Does a catalyst change the distribution curve?" Answer: <strong style="color:var(--acc)">NO</strong>!</span>
+      </div>
+
+      <h4>🇭🇰 <span class="zh-only">香港生活例子</span><span class="en-only">Hong Kong Real-Life Examples</span></h4>
+      <div class="concept-visual" style="text-align:left;font-size:13px">
+        <span class="zh-only">
+        • <strong>茶餐廳凍檸茶：</strong>為什麼用熱水泡茶比冷水快得多？因為溫度高→水分子的動能大→茶葉中茶多酚分子的擴散速率增加→有效碰撞頻率增加→溶解速率增加。香港茶餐廳用接近沸騰的水沖茶，就是這個原理！<br>
+        • <strong>山頂的壓力鍋：</strong>在高海拔地區（如大帽山山頂 957m），大氣壓力比海平面低約 10%，水的沸點降低（約 96°C 而非 100°C），食物煮得慢。壓力鍋增加鍋內壓力→提高水的沸點→食物更快煮熟！<br>
+        • <strong>維港煙花：</strong>煙花爆炸是極快的反應（毫秒級），因為反應物被磨成極細粉末（表面積極大）+ 高溫引爆。這是表面積效應的極端例子！<br>
+        • <strong>香港的鋁罐回收：</strong>為什麼回收鋁罐比從鋁礬土提取鋁更環保？因為重新熔煉鋁只需要原來 5% 的能量！鋁的提取是電解（消耗大量電能），而回收只需加熱熔化——速率快、能耗低。<br>
+        • <strong>冷氣機與食物保存：</strong>為什麼冰箱能延長食物保質期？低溫降低細菌體內酶（enzyme，生物催化劑）催化的反應速率→細菌繁殖減慢→食物不易變壞。這就是為什麼香港潮濕天氣下食物特別容易變壞——高溫高濕加速了化學反應和微生物生長。<br>
+        • <strong>胃酸消化：</strong>胃蛋白酶（pepsin）在 pH 2 的環境下活性最高。吃藥時用大量水稀釋胃酸→pH 上升→酶活性降低→藥物分解減慢。所以有些藥要空腹吃，就是要保持胃酸濃度。
+        </span>
+        <span class="en-only">
+        • <strong>Cha chaan teng hot lemon tea:</strong> Hot water brews tea faster than cold because higher T → higher KE → faster diffusion → more effective collisions → faster dissolution. HK restaurants use near-boiling water!<br>
+        • <strong>Pressure cooker at Victoria Peak:</strong> At Tai Mo Shan (957m), atmospheric pressure is ~10% lower, water boils at ~96°C. Pressure cooker raises boiling point → food cooks faster!<br>
+        • <strong>Victoria Harbour fireworks:</strong> Explosive reactions in milliseconds because reactants are ultra-fine powder (huge surface area) + high temperature ignition. Extreme example of surface area effect!<br>
+        • <strong>Aluminium can recycling in HK:</strong> Recycling Al uses only 5% of original energy. Extraction is electrolysis (energy-intensive); recycling just needs melting — faster, less energy.<br>
+        • <strong>Air conditioning & food storage:</strong> Fridges slow bacterial enzyme-catalysed reactions. HK's hot humid weather accelerates chemical reactions and microbial growth → food spoils faster.<br>
+        • <strong>Stomach acid digestion:</strong> Pepsin works best at pH 2. Drinking lots of water dilutes stomach acid → pH rises → enzyme activity drops → drug dissolution slows. Some medicines must be taken on empty stomach.
+        </span>
+      </div>
+
+      <h4>🏛️ <span class="zh-only">典故：Svante Arrhenius 與活化能</span><span class="en-only">🏛️ Story: Svante Arrhenius & Activation Energy</span></h4>
+      <p><span class="zh-only"><strong>Svante Arrhenius（1859-1927）</strong>是瑞典化學家，1903 年諾貝爾化學獎得主。他在 1889 年提出了著名的<strong>阿倫尼烏斯方程</strong>：k = Ae<sup>-Ea/RT</sup>，揭示了溫度如何影響反應速率常數 k。這個方程式中的 Ea 就是活化能。<br><br>
+      有趣的是，Arrhenius 的博士論文最初被評為「四等」（最低通過等級），因為他的電離理論太超前了——他提出鹽溶於水會自動離解成離子，當時的教授們覺得這是瘋話。但後來這個理論被證明是正確的，他也因此獲得諾貝爾獎。<br><br>
+      <strong>活化能的概念：</strong>可以想像成翻過一座山丘。即使下坡路段的終點比起點低（放熱反應），你仍然需要先爬上山頂（活化能）才能到達終點。催化劑就像幫你挖了一條隧道——繞過山頂，降低需要攀爬的高度！<br><br>
+      <strong>碰撞理論的歷史：</strong>Max Trautz（1916）和 William Lewis（1918）分別獨立提出了碰撞理論。他們發現不是所有碰撞都能引發反應——只有能量足夠且方向正確的碰撞才有效。這解釋了為什麼室溫下的氫氣和氧氣混合物不會立即爆炸——雖然分子在不斷碰撞，但大部分碰撞的能量低於活化能 Ea！</span>
+      <span class="en-only"><strong>Svante Arrhenius (1859-1927)</strong> was a Swedish chemist, 1903 Nobel Prize winner. In 1889, he proposed the famous <strong>Arrhenius equation</strong>: k = Ae<sup>-Ea/RT</sup>, revealing how temperature affects rate constant k. Ea is activation energy.<br><br>
+      Ironically, Arrhenius's PhD thesis was rated "4th class" (lowest pass) because his electrolytic dissociation theory was too radical — he proposed salts auto-dissociate into ions in water. Professors thought he was crazy. Later proven correct, he won the Nobel Prize.<br><br>
+      <strong>Activation energy analogy:</strong> Like climbing a hill. Even if the destination is lower than the start (exothermic), you must first climb to the top (Ea). A catalyst is like digging a tunnel — bypassing the summit, lowering the climb!<br><br>
+      <strong>Collision theory history:</strong> Max Trautz (1916) and William Lewis (1918) independently proposed collision theory. Not all collisions cause reactions — only those with sufficient energy AND correct orientation are effective. This explains why H₂ + O₂ mixture at room temperature doesn't explode immediately — most collisions have energy below Ea!</span></p>
+
+      <h4>📊 <span class="zh-only">舊試卷分析：反應速率</span><span class="en-only">📊 Past Paper Analysis: Rate of Reaction</span></h4>
+      <div class="concept-visual" style="text-align:left;font-size:12px">
+        <span class="zh-only">
+        <strong>出題頻率：每年必考（100%）</strong><br><br>
+        <strong>最常見題型：</strong><br>
+        ① 碰撞理論解釋速率變化 — 出現率 95%（幾乎每年必出一條）<br>
+        ② Maxwell-Boltzmann 曲線繪製/解讀 — 出現率 70%<br>
+        ③ 實驗設計量度速率（氣體體積/質量變化）— 出現率 60%<br>
+        ④ 催化劑 vs 溫度的比較（陷阱題）— 出現率 50%<br><br>
+        <strong>近五年反應速率相關考題：</strong><br>
+        • 2024 DSE：MC Q15, Q36 / Paper 1B Q2 (collision theory + curve)<br>
+        • 2023 DSE：MC Q17, Q32 / Paper 1B Q1 (factors affecting rate)<br>
+        • 2022 DSE：MC Q14, Q35 / Paper 1B Q3 (Maxwell-Boltzmann)<br>
+        • 2021 DSE：MC Q12, Q28 / Paper 1B Q2 (experiment design)<br>
+        • 2020 DSE：MC Q15, Q33 / Paper 1B Q4 (catalyst effect)<br><br>
+        <strong style="color:var(--gold)">⭐ 5** 答題模板（每次都要這樣寫！）：</strong><br>
+        "When [factor] increases, the particles have [more/less] [kinetic energy / collisions per unit time]. This leads to an increase in the frequency of <strong>effective collisions</strong>. Hence, the rate of reaction <strong>increases</strong>."<br><br>
+        ⚠️ 注意：永遠要寫「effective collisions」，不能只寫「collisions」！
+        </span>
+        <span class="en-only">
+        <strong>Frequency: Every year (100%)</strong><br><br>
+        <strong>Most common types:</strong><br>
+        ① Collision theory explanation — 95%<br>
+        ② Maxwell-Boltzmann curve drawing/interpretation — 70%<br>
+        ③ Experiment design (gas volume / mass change) — 60%<br>
+        ④ Catalyst vs temperature comparison (trap!) — 50%<br><br>
+        <strong>Recent 5 years rate questions:</strong><br>
+        • 2024: MC Q15, Q36 / Paper 1B Q2<br>
+        • 2023: MC Q17, Q32 / Paper 1B Q1<br>
+        • 2022: MC Q14, Q35 / Paper 1B Q3<br>
+        • 2021: MC Q12, Q28 / Paper 1B Q2<br>
+        • 2020: MC Q15, Q33 / Paper 1B Q4<br><br>
+        <strong style="color:var(--gold)">⭐ Always write "effective collisions", not just "collisions"!</strong>
+        </span>
       </div>
     </div></div>
   </div>
@@ -1152,6 +1379,55 @@ footer{text-align:center;padding:30px 16px;color:var(--dim);font-size:11px;borde
   <p style="margin-top:4px"><span class="zh-only">努力不會背叛你 — 祝奪星成功！⭐</span><span class="en-only">Hard work never betrays you — Good luck! ⭐</span></p>
 </footer>
 
+<!-- AI Tutor Section -->
+<div class="section" id="aitutor">
+  <div style="padding:0 16px;max-width:860px;margin:0 auto">
+    <div style="font-size:22px;font-weight:900;margin:20px 0 6px">🤖 <span class="zh-only">AI 化學老師</span><span class="en-only">AI Chemistry Tutor</span></div>
+    <div style="color:var(--dim);font-size:13px;margin-bottom:16px"><span class="zh-only">Powered by GLM-5.1 — 任何化學問題即問即答！支持中英文</span><span class="en-only">Powered by GLM-5.1 — Ask any chemistry question! Supports Chinese & English</span></div>
+
+    <div class="ai-box open" id="aiBox" style="position:relative;bottom:auto;right:auto;width:100%;height:min(520px,70vh)">
+      <div class="ai-header">
+        <h3>🧪 <span class="zh-only">化學老師</span><span class="en-only">Chem Tutor</span></h3>
+        <span>GLM-5.1</span>
+      </div>
+      <div class="ai-messages" id="aiMessages">
+        <div class="ai-msg bot"><span class="zh-only">你好！我是你的 DSE 化學 AI 老師 🧪
+
+我可以幫你：
+• 解釋任何化學概念
+• 解答 MC 和結構題
+• 提供溫習建議
+• 解釋化學方程式
+• 分析舊試卷題型
+
+直接問我任何化學問題吧！</span><span class="en-only">Hello! I'm your DSE Chemistry AI Tutor 🧪
+
+I can help you:
+• Explain any chemistry concept
+• Solve MC and structured questions
+• Provide study tips
+• Explain chemical equations
+• Analyse past paper question types
+
+Ask me any chemistry question!</span></div>
+      </div>
+      <div class="ai-suggestions" id="aiSuggestions">
+        <div class="ai-sug" onclick="aiAsk(this.textContent)"><span class="zh-only">摩爾計算有什麼技巧？</span><span class="en-only">Tips for mole calculations?</span></div>
+        <div class="ai-sug" onclick="aiAsk(this.textContent)"><span class="zh-only">怎樣區分加成、取代和消除？</span><span class="en-only">How to distinguish addition, substitution, elimination?</span></div>
+        <div class="ai-sug" onclick="aiAsk(this.textContent)"><span class="zh-only">Le Chatelier 原理怎樣用？</span><span class="en-only">How to apply Le Chatelier's principle?</span></div>
+        <div class="ai-sug" onclick="aiAsk(this.textContent)"><span class="zh-only">電解產物怎樣預測？</span><span class="en-only">How to predict electrolysis products?</span></div>
+      </div>
+      <div class="ai-input">
+        <input type="text" id="aiInput" placeholder="問任何 DSE 化學問題..." onkeydown="if(event.key==='Enter')aiSend()">
+        <button onclick="aiSend()"><span class="zh-only">發送</span><span class="en-only">Send</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Floating AI Button -->
+<button class="ai-toggle" id="aiFloatBtn" onclick="switchTab('aitutor')">🤖</button>
+
 <script>
 // ===== LANGUAGE =====
 function setLang(l){
@@ -1273,7 +1549,183 @@ const quizData=[
   opts_en:["ΔH = ΔH(products) + ΔH(reactants)","ΔH = Σ(bond energies of reactants) − Σ(bond energies of products)","ΔH depends on the reaction pathway","ΔH can be calculated via any pathway with the same result"],
   ans:3,topic:"Energy",
   exp_zh:"Hess's Law：總焓變只與始態和終態有關，與反應途徑無關。所以可以通過任何途徑計算，結果相同。選項 B 是鍵能法（但正確公式是反應物鍵能 − 生成物鍵能 = ΔH）。",
-  exp_en:"Hess's Law: total enthalpy change depends only on initial and final states, not the pathway. So any pathway gives the same result. Option B is bond energy method (but formula is reactant bonds − product bonds = ΔH)."}
+  exp_en:"Hess's Law: total enthalpy change depends only on initial and final states, not the pathway. So any pathway gives the same result. Option B is bond energy method (but formula is reactant bonds − product bonds = ΔH)."},
+
+  // === NEW MC QUESTIONS (13-36) ===
+  {q_zh:"電解 CuSO₄(aq) 時使用銅電極，下列哪個敘述正確？",q_en:"During electrolysis of CuSO₄(aq) using copper electrodes, which statement is correct?",
+  opts_zh:["陽極產生 O₂","陰極銅的質量增加","溶液藍色加深","陽極銅的質量不變"],
+  opts_en:["O₂ is produced at the anode","The mass of copper at the cathode increases","The blue colour of the solution deepens","The mass of copper at the anode remains unchanged"],
+  ans:1,topic:"Electrolysis",
+  exp_zh:"使用活性電極（Cu）時，陽極的 Cu 被氧化：Cu → Cu²⁺ + 2e⁻（銅溶解）。陰極：Cu²⁺ + 2e⁻ → Cu（沉積）。所以陰極銅的質量增加，陽極銅的質量減少，溶液藍色不變（Cu²⁺ 濃度恆定）。",
+  exp_en:"With active Cu electrodes: anode Cu oxidises (Cu → Cu²⁺ + 2e⁻, dissolves). Cathode: Cu²⁺ + 2e⁻ → Cu (deposits). So cathode Cu mass increases, anode Cu mass decreases, solution blue colour unchanged (Cu²⁺ concentration constant)."},
+
+  {q_zh:"50 cm³ 的 0.2 M H₂SO₄ 與 50 cm³ 的 0.4 M NaOH 混合，最終溶液呈：",q_en:"50 cm³ of 0.2 M H₂SO₄ is mixed with 50 cm³ of 0.4 M NaOH. The final solution is:",
+  opts_zh:["酸性","中性","鹼性","無法判斷"],
+  opts_en:["acidic","neutral","alkaline","cannot be determined"],
+  ans:2,topic:"Acids/Bases",
+  exp_zh:"n(H₂SO₄) = 0.2 × 0.05 = 0.01 mol → n(H⁺) = 0.02 mol。n(NaOH) = 0.4 × 0.05 = 0.02 mol。H⁺ + OH⁻ → H₂O，剛好完全中和？等等——H₂SO₄ 是二元酸！0.01 mol H₂SO₄ 產生 0.02 mol H⁺，NaOH 也是 0.02 mol。所以恰好中和，溶液呈中性。但 NaOH 是強鹼，H₂SO₄ 是強酸，鹽 Na₂SO₄ 是中性鹽。",
+  exp_en:"n(H₂SO₄) = 0.2 × 0.05 = 0.01 mol → n(H⁺) = 0.02 mol. n(NaOH) = 0.4 × 0.05 = 0.02 mol. H⁺ + OH⁻ → H₂O, exactly neutralised. Na₂SO₄ is a neutral salt from strong acid + strong base."},
+
+  {q_zh:"下列哪個氧化物是酸性氧化物？",q_en:"Which oxide is an acidic oxide?",
+  opts_zh:["Na₂O","MgO","Al₂O₃","SO₃"],
+  opts_en:["Na₂O","MgO","Al₂O₃","SO₃"],
+  ans:3,topic:"Acids/Bases",
+  exp_zh:"非金屬氧化物通常是酸性氧化物。SO₃ + H₂O → H₂SO₄（硫酸）。Na₂O 是鹼性氧化物（金屬氧化物），MgO 也是鹼性，Al₂O₃ 是兩性氧化物。",
+  exp_en:"Non-metal oxides are usually acidic. SO₃ + H₂O → H₂SO₄ (sulphuric acid). Na₂O is basic (metal oxide), MgO is basic, Al₂O₃ is amphoteric."},
+
+  {q_zh:"在 Fe²⁺ → Fe³⁺ + e⁻ 中，Fe²⁺ 發生了：",q_en:"In Fe²⁺ → Fe³⁺ + e⁻, Fe²⁺ has been:",
+  opts_zh:["還原","氧化","中和","分解"],
+  opts_en:["reduced","oxidised","neutralised","decomposed"],
+  ans:1,topic:"Redox",
+  exp_zh:"Fe²⁺ 失去一個電子（氧化數從 +2 增加到 +3），這是氧化反應。記住口訣：OIL RIG（Oxidation Is Loss, Reduction Is Gain — of electrons）。",
+  exp_en:"Fe²⁺ loses an electron (oxidation number increases from +2 to +3) — this is oxidation. Remember: OIL RIG (Oxidation Is Loss, Reduction Is Gain of electrons)."},
+
+  {q_zh:"下列哪種方法可以加快 Zn + HCl 的反應速率？",q_en:"Which method increases the rate of Zn + HCl reaction?",
+  opts_zh:["降低 HCl 濃度","使用鋅粉代替鋅粒","降低溫度","加入催化劑"],
+  opts_en:["Decrease HCl concentration","Use zinc powder instead of granules","Decrease temperature","Add a catalyst"],
+  ans:1,topic:"Rate",
+  exp_zh:"鋅粉的表面積比鋅粒大得多→接觸面積增加→碰撞頻率增加→有效碰撞頻率增加→反應速率增加。降低濃度和溫度會減慢反應。Zn + HCl 不需要催化劑。",
+  exp_en:"Zinc powder has much larger surface area than granules → more contact area → higher collision frequency → more effective collisions → faster rate. Lower concentration and temperature slow the reaction."},
+
+  {q_zh:"下列哪個關於聚合物的敘述是正確的？",q_en:"Which statement about polymers is correct?",
+  opts_zh:["加成聚合產生副產物","聚乙烯是縮合聚合物","加成聚合物由烯烴聚合而成","聚合物不能被回收"],
+  opts_en:["Addition polymerisation produces by-products","Polyethylene is a condensation polymer","Addition polymers are formed from alkenes","Polymers cannot be recycled"],
+  ans:2,topic:"Organic",
+  exp_zh:"加成聚合（addition polymerisation）由含有 C=C 雙鍵的烯烴（alkene）聚合而成，不產生副產物。例如 nCH₂=CH₂ → (-CH₂-CH₂-)ₙ。縮合聚合（condensation polymerisation）才會產生小分子副產物（如 H₂O）。",
+  exp_en:"Addition polymerisation uses alkenes (with C=C double bonds) and produces no by-products. E.g. nCH₂=CH₂ → (-CH₂-CH₂-)ₙ. Condensation polymerisation produces small molecule by-products (e.g. H₂O)."},
+
+  {q_zh:"碳酸鈣（CaCO₃）加熱分解的方程式是：",q_en:"The thermal decomposition equation of calcium carbonate (CaCO₃) is:",
+  opts_zh:["CaCO₃ → Ca + CO₃","CaCO₃ → CaO + CO₂","CaCO₃ → Ca₂O + CO₂","CaCO₃ + H₂O → Ca(OH)₂ + CO₂"],
+  opts_en:["CaCO₃ → Ca + CO₃","CaCO₃ → CaO + CO₂","CaCO₃ → Ca₂O + CO₂","CaCO₃ + H₂O → Ca(OH)₂ + CO₂"],
+  ans:1,topic:"Metals",
+  exp_zh:"碳酸鈣熱分解：CaCO₃(s) → CaO(s) + CO₂(g)。CaO 是生石灰（quicklime），加水變成熟石灰 Ca(OH)₂。這是 DSE 經典方程式！",
+  exp_en:"Thermal decomposition of calcium carbonate: CaCO₃(s) → CaO(s) + CO₂(g). CaO is quicklime, which becomes slaked lime Ca(OH)₂ when water is added. Classic DSE equation!"},
+
+  {q_zh:"週期表中，同一週期由左至右，原子半徑：",q_en:"Across a period in the periodic table (left to right), atomic radius:",
+  opts_zh:["增大","減小","不變","先增後減"],
+  opts_en:["increases","decreases","remains constant","increases then decreases"],
+  ans:1,topic:"Atomic",
+  exp_zh:"同一週期由左至右，質子數增加→核電荷增加→對電子的吸引力增強→原子半徑減小。注意電子層數不變（同一週期），所以遮蔽效應差不多，主要受核電荷影響。",
+  exp_en:"Across a period, proton number increases → nuclear charge increases → stronger attraction on electrons → atomic radius decreases. Electron shells remain the same (same period), so shielding is similar; nuclear charge dominates."},
+
+  {q_zh:"下列哪個測試可以用來區分硬水和軟水？",q_en:"Which test can distinguish hard water from soft water?",
+  opts_zh:["測量 pH 值","加入肥皂水搖勻","加入 NaOH","加熱至沸騰"],
+  opts_en:["Measure pH","Add soap solution and shake","Add NaOH","Heat to boiling"],
+  ans:1,topic:"Acids/Bases",
+  exp_zh:"硬水含有 Ca²⁺/Mg²⁺ 離子，會與肥皂（硬脂酸鈉）反應產生不溶性沉澱（浮渣 scum），所以泡沫少。軟水加入肥皂後泡沫豐富。這是 DSE 最常考的硬水測試方法。",
+  exp_en:"Hard water contains Ca²⁺/Mg²⁺ ions which react with soap (sodium stearate) to form insoluble scum, producing less lather. Soft water produces abundant lather with soap. Most commonly tested hard water detection method in DSE."},
+
+  {q_zh:"下列哪個關於 Na 的敘述是正確的？",q_en:"Which statement about Na is correct?",
+  opts_zh:["Na 是過渡金屬","Na 的原子序數是 11","Na²⁺ 是 Na 的常見離子","Na 不與水反應"],
+  opts_en:["Na is a transition metal","Na has atomic number 11","Na²⁺ is the common ion of Na","Na does not react with water"],
+  ans:1,topic:"Atomic",
+  exp_zh:"Na 的電子排佈是 2,8,1，原子序數 = 11（2+8+1）。Na 是鹼金屬（Group I），不是過渡金屬。Na 的常見離子是 Na⁺（失去1個電子），不是 Na²⁺。Na 能與冷水劇烈反應。",
+  exp_en:"Na electron configuration: 2,8,1, atomic number = 11 (2+8+1). Na is an alkali metal (Group I), not transition metal. Common ion is Na⁺ (loses 1 electron), not Na²⁺. Na reacts vigorously with cold water."},
+
+  {q_zh:"下列哪個關於同位素的敘述是正確的？",q_en:"Which statement about isotopes is correct?",
+  opts_zh:["同位素的質子數不同","同位素的化學性質不同","同位素的電子數相同","同位素的質量數相同"],
+  opts_en:["Isotopes have different numbers of protons","Isotopes have different chemical properties","Isotopes have the same number of electrons","Isotopes have the same mass number"],
+  ans:2,topic:"Atomic",
+  exp_zh:"同位素 = 相同質子數（相同元素）但不同中子數。因為質子數相同→電子數相同→化學性質相同。但中子數不同→質量數不同。例如 ¹²C 和 ¹⁴C。",
+  exp_en:"Isotopes = same proton number (same element) but different neutron numbers. Same protons → same electrons → same chemical properties. Different neutrons → different mass numbers. E.g. ¹²C and ¹⁴C."},
+
+  {q_zh:"電解熔融 PbBr₂ 時，陰極的半方程式是：",q_en:"During electrolysis of molten PbBr₂, the half equation at the cathode is:",
+  opts_zh:["Pb²⁺ + 2e⁻ → Pb","Pb → Pb²⁺ + 2e⁻","2Br⁻ → Br₂ + 2e⁻","Br₂ + 2e⁻ → 2Br⁻"],
+  opts_en:["Pb²⁺ + 2e⁻ → Pb","Pb → Pb²⁺ + 2e⁻","2Br⁻ → Br₂ + 2e⁻","Br₂ + 2e⁻ → 2Br⁻"],
+  ans:0,topic:"Electrolysis",
+  exp_zh:"陰極是還原（得到電子）。熔融 PbBr₂ 中只有 Pb²⁺ 和 Br⁻。Pb²⁺ 在陰極被還原：Pb²⁺ + 2e⁻ → Pb(l)。Br⁻ 在陽極被氧化。",
+  exp_en:"Cathode = reduction (gain of electrons). In molten PbBr₂, only Pb²⁺ and Br⁻ present. Pb²⁺ reduced at cathode: Pb²⁺ + 2e⁻ → Pb(l). Br⁻ oxidised at anode."},
+
+  {q_zh:"加入催化劑對平衡系統的影響是：",q_en:"The effect of adding a catalyst to an equilibrium system is:",
+  opts_zh:["增加產物濃度","增加正反應速率但減少逆反應速率","不改變平衡位置，但更快達到平衡","使平衡向右移動"],
+  opts_en:["increases product concentration","increases forward rate but decreases backward rate","does not change equilibrium position, but reaches equilibrium faster","shifts equilibrium to the right"],
+  ans:2,topic:"Equilibrium",
+  exp_zh:"催化劑等量增加正反應和逆反應的速率，不改變平衡位置（Kc 不變），只是更快達致平衡。這是 DSE 超高頻陷阱題！催化劑 ≠ 更多產物。",
+  exp_en:"Catalyst increases both forward and backward rates equally, not changing equilibrium position (Kc unchanged), just reaching equilibrium faster. Ultra-high frequency DSE trap question! Catalyst ≠ more products."},
+
+  {q_zh:"甲烷（CH₄）燃燒的方程式是：",q_en:"The equation for combustion of methane (CH₄) is:",
+  opts_zh:["CH₄ + O₂ → CO + 2H₂O","CH₄ + 2O₂ → CO₂ + 2H₂O","CH₄ + O₂ → C + 2H₂O","2CH₄ + 3O₂ → 2CO + 4H₂O"],
+  opts_en:["CH₄ + O₂ → CO + 2H₂O","CH₄ + 2O₂ → CO₂ + 2H₂O","CH₄ + O₂ → C + 2H₂O","2CH₄ + 3O₂ → 2CO + 4H₂O"],
+  ans:1,topic:"Organic",
+  exp_zh:"完全燃燒：CH₄ + 2O₂ → CO₂ + 2H₂O。注意要配平！氧氣不足時才產生 CO（不完全燃燒）。香港的煤氣（天然氣主要成分是甲烷）就是這個反應提供能量的。",
+  exp_en:"Complete combustion: CH₄ + 2O₂ → CO₂ + 2H₂O. Must be balanced! CO is produced only in incomplete combustion (insufficient O₂). HK's town gas (natural gas, mainly methane) provides energy through this reaction."},
+
+  {q_zh:"下列哪個實驗可以用來量度反應速率？",q_en:"Which experiment can measure reaction rate?",
+  opts_zh:["量度沉澱物的質量","在密閉系統中量度氣體體積隨時間變化","量度溶液的顏色","測量溶液的 pH 值"],
+  opts_en:["Measure the mass of precipitate","Measure gas volume change over time in a closed system","Measure the colour of the solution","Measure the pH of the solution"],
+  ans:1,topic:"Rate",
+  exp_zh:"量度氣體體積隨時間的變化是 DSE 最常考的速率實驗。例如 Zn + HCl 產生 H₂，用氣針（gas syringe）記錄不同時間的 H₂ 體積，繪製 volume-time graph，斜率 = 反應速率。",
+  exp_en:"Measuring gas volume change over time is the most commonly tested rate experiment in DSE. E.g. Zn + HCl producing H₂, using a gas syringe to record H₂ volume at different times. Plot volume-time graph; slope = rate."},
+
+  {q_zh:"在 Kc = [C]ᶜ[D]ᵈ / [A]ᵃ[B]ᵇ 中，改變下列哪個因素會改變 Kc？",q_en:"In Kc = [C]ᶜ[D]ᵈ / [A]ᵃ[B]ᵇ, changing which factor changes Kc?",
+  opts_zh:["濃度","壓力","催化劑","溫度"],
+  opts_en:["Concentration","Pressure","Catalyst","Temperature"],
+  ans:3,topic:"Equilibrium",
+  exp_zh:"Kc 只受溫度影響！改變濃度會移動平衡位置但 Kc 不變。改變壓力（對氣體系統）同樣只移動平衡位置。催化劑不改變平衡位置也不改變 Kc。只有溫度改變才會改變 Kc 值。",
+  exp_en:"Kc is ONLY affected by temperature! Changing concentration shifts equilibrium position but Kc stays constant. Pressure change (for gaseous systems) also only shifts position. Catalyst doesn't change position or Kc. Only temperature changes Kc value."},
+
+  {q_zh:"下列哪個物質是強酸？",q_en:"Which substance is a strong acid?",
+  opts_zh:["CH₃COOH","H₂CO₃","HCl","H₂SO₃"],
+  opts_en:["CH₃COOH","H₂CO₃","HCl","H₂SO₃"],
+  ans:2,topic:"Acids/Bases",
+  exp_zh:"DSE 必記的強酸：HCl、H₂SO₄、HNO₃。它們在水中完全電離。CH₃COOH（醋酸）、H₂CO₃（碳酸）、H₂SO₃（亞硫酸）都是弱酸——只部分電離。",
+  exp_en:"Must-memorise strong acids for DSE: HCl, H₂SO₄, HNO₃. They fully dissociate in water. CH₃COOH (ethanoic acid), H₂CO₃ (carbonic acid), H₂SO₃ (sulphurous acid) are weak acids — only partially dissociate."},
+
+  {q_zh:"蒸餾水和自來水的區別在於：",q_en:"The difference between distilled water and tap water is:",
+  opts_zh:["蒸餾水含有更多礦物質","自來水含有溶解的離子如 Ca²⁺ 和 Cl⁻","蒸餾水的 pH 值更高","自來水不含任何溶質"],
+  opts_en:["Distilled water contains more minerals","Tap water contains dissolved ions like Ca²⁺ and Cl⁻","Distilled water has a higher pH","Tap water contains no solutes"],
+  ans:1,topic:"Separation",
+  exp_zh:"自來水經過淨化但仍含有溶解的礦物質離子（Ca²⁺、Mg²⁺、Cl⁻ 等），屬於硬水。蒸餾水通過蒸餾去除所有溶解物質，是純水。香港部分地區的自來水硬度較高。",
+  exp_en:"Tap water is purified but still contains dissolved mineral ions (Ca²⁺, Mg²⁺, Cl⁻ etc.), making it hard water. Distilled water removes all dissolved substances through distillation, producing pure water."},
+
+  {q_zh:"下列哪種分離方法最適合分離兩種不互溶液體？",q_en:"Which separation method is best for separating two immiscible liquids?",
+  opts_zh:["蒸餾","過濾","分液漏斗（separating funnel）","結晶"],
+  opts_en:["Distillation","Filtration","Separating funnel","Crystallisation"],
+  ans:2,topic:"Separation",
+  exp_zh:"分液漏斗用於分離不互溶液體（如油和水）。較密的液體在底層，打開活塞讓底層液體流出。蒸餾用於分離互溶液體，過濾用於固液分離，結晶用於從溶液提取固體。",
+  exp_en:"Separating funnel separates immiscible liquids (e.g. oil and water). Denser liquid is at the bottom; open the tap to drain the lower layer. Distillation separates miscible liquids, filtration separates solid-liquid, crystallisation extracts solid from solution."},
+
+  {q_zh:"鐵生鏽需要哪些條件？",q_en:"What conditions are required for iron rusting?",
+  opts_zh:["只有水","只有氧氣","水和氧氣","水和二氧化碳"],
+  opts_en:["Water only","Oxygen only","Water and oxygen","Water and carbon dioxide"],
+  ans:2,topic:"Metals",
+  exp_zh:"鐵生鏽需要水和氧氣同時存在。鏽的化學式是 Fe₂O₃·xH₂O（水合氧化鐵）。香港潮濕的氣候使鐵器更容易生鏽。防止生鏽的方法：塗油漆、電鍍、犧牲保護（sacrificial protection）。",
+  exp_en:"Iron rusting requires both water AND oxygen simultaneously. Rust formula: Fe₂O₃·xH₂O (hydrated iron(III) oxide). HK's humid climate accelerates rusting. Prevention: painting, electroplating, sacrificial protection."},
+
+  {q_zh:"下列哪個關於 NaCl 晶體的敘述是正確的？",q_en:"Which statement about NaCl crystal is correct?",
+  opts_zh:["NaCl 由分子組成","NaCl 晶體能導電","NaCl 在固態時不導電，溶於水後導電","NaCl 的熔點很低"],
+  opts_en:["NaCl consists of molecules","NaCl crystal can conduct electricity","NaCl does not conduct in solid state but conducts when dissolved in water","NaCl has a low melting point"],
+  ans:2,topic:"Bonding",
+  exp_zh:"NaCl 是巨型離子結構。固態時離子被固定在晶格中不能移動→不導電。溶於水後離子可自由移動→導電。熔融狀態也可導電。NaCl 熔點高（801°C），不是由分子組成。",
+  exp_en:"NaCl has a giant ionic structure. In solid state, ions are fixed in lattice and cannot move → no conduction. When dissolved, ions are free to move → conducts electricity. Molten state also conducts. NaCl has high mp (801°C), not made of molecules."},
+
+  {q_zh:"下列哪個反應是吸熱反應（endothermic）？",q_en:"Which reaction is endothermic?",
+  opts_zh:["中和反應","燃燒","碳酸鈣的熱分解","金屬與酸反應"],
+  opts_en:["Neutralisation","Combustion","Thermal decomposition of calcium carbonate","Reaction of metal with acid"],
+  ans:2,topic:"Energy",
+  exp_zh:"碳酸鈣分解 CaCO₃ → CaO + CO₂ 需要持續加熱，是吸熱反應（ΔH > 0）。中和反應、燃燒、金屬與酸反應都是放熱反應（ΔH < 0）。",
+  exp_en:"CaCO₃ decomposition requires continuous heating → endothermic (ΔH > 0). Neutralisation, combustion, and metal + acid reactions are all exothermic (ΔH < 0)."},
+
+  {q_zh:"某元素 X 的電子排佈為 2,8,6。X 最可能屬於：",q_en:"An element X has electron configuration 2,8,6. X most likely belongs to:",
+  opts_zh:["Group II","Group VI","Period 2","過渡金屬"],
+  opts_en:["Group II","Group VI","Period 2","Transition metals"],
+  ans:1,topic:"Atomic",
+  exp_zh:"最外層有 6 個電子 → Group VI。有 3 層電子（2,8,6）→ Period 3。所以 X 是硫（Sulfur, S）。Group 由最外層電子數決定，Period 由電子層數決定。",
+  exp_en:"Outermost shell has 6 electrons → Group VI. Has 3 electron shells (2,8,6) → Period 3. So X is Sulfur (S). Group determined by outermost electrons; Period by number of shells."},
+
+  {q_zh:"紙色層法（paper chromatography）中，Rf 值的定義是：",q_en:"In paper chromatography, Rf value is defined as:",
+  opts_zh:["溶質移動距離 ÷ 溶劑移動距離","溶劑移動距離 ÷ 溶質移動距離","溶質質量 ÷ 溶劑質量","斑點面積 ÷ 濾紙面積"],
+  opts_en:["distance travelled by solute ÷ distance travelled by solvent","distance travelled by solvent ÷ distance travelled by solute","mass of solute ÷ mass of solvent","spot area ÷ paper area"],
+  ans:0,topic:"Separation",
+  exp_zh:"Rf = 溶質移動距離 / 溶劑前沿移動距離。Rf 值介於 0 到 1 之間。不同物質在相同溶劑中有不同的 Rf 值，可用於鑑定物質。",
+  exp_en:"Rf = distance travelled by solute / distance travelled by solvent front. Rf value is between 0 and 1. Different substances have different Rf values in the same solvent, used for identification."},
+
+  {q_zh:"鋁的提取方法是：",q_en:"Aluminium is extracted by:",
+  opts_zh:["用碳還原鋁礦","電解熔融氧化鋁","加熱分解","用氫氣還原"],
+  opts_en:["carbon reduction of aluminium ore","electrolysis of molten aluminium oxide","thermal decomposition","reduction with hydrogen"],
+  ans:1,topic:"Electrolysis",
+  exp_zh:"Al 太活潑，不能用碳還原。必須用電解熔融 Al₂O₃（溶在熔融 cryolite Na₃AlF₆ 中降低熔點）。陰極：Al³⁺ + 3e⁻ → Al(l)。陽極：2O²⁻ → O₂ + 4e⁻。這是 Hall-Héroult 法。",
+  exp_en:"Al is too reactive for carbon reduction. Must use electrolysis of molten Al₂O₃ (dissolved in molten cryolite Na₃AlF₆ to lower mp). Cathode: Al³⁺ + 3e⁻ → Al(l). Anode: 2O²⁻ → O₂ + 4e⁻. This is the Hall-Héroult process."}
 ];
 
 let quizState={current:0,score:0,answered:new Array(quizData.length).fill(false)};
@@ -1435,7 +1887,176 @@ This is a reduction — CHO is reduced to CH₂OH.<br><br>
 3. More effective collisions per unit time<br>
 4. Hence, higher reaction rate<br><br>
 <strong>Note:</strong> Both reactions produce the same final volume of H₂ (Mg is limiting), just at different rates.
-<p style="color:var(--gold)">⭐ 5** Must-include: "increased frequency of effective collisions per unit time"</p>`}
+<p style="color:var(--gold)">⭐ 5** Must-include: "increased frequency of effective collisions per unit time"</p>`},
+
+  // === NEW STRUCTURED QUESTIONS (5-10) ===
+  {topic:"Electrolysis",
+   q_zh:"下圖顯示電解稀硫酸的裝置。預測 (a) 陽極和陰極的產物 (b) 寫出兩個半方程式 (c) 解釋為什麼溶液的 pH 值會逐漸下降。（6 分）",
+   q_en:"The diagram shows the electrolysis of dilute sulphuric acid. Predict (a) the products at the anode and cathode (b) write both half equations (c) explain why the solution pH gradually decreases. (6 marks)",
+   model_zh:`<strong>Model Answer:</strong><br><br>
+(a) <strong>陽極：</strong>O₂（氧氣）<br>
+<strong>陰極：</strong>H₂（氫氣）<br><br>
+(b) <strong>半方程式：</strong><br>
+陽極（氧化）：4OH⁻ → O₂ + 2H₂O + 4e⁻<br>
+陰極（還原）：2H⁺ + 2e⁻ → H₂<br><br>
+(c) 在稀 H₂SO₄ 中，H⁺ 和 OH⁻ 都來自水的自離解。電解消耗了 H⁺（陰極）和 OH⁻（陽極），但 SO₄²⁻ 留在溶液中。因為水被電解（2H₂O → 2H₂ + O₂），溶液中 H₂SO₄ 的相對濃度增加 → H⁺ 濃度增加 → pH 下降。
+<p style="color:var(--gold)">⭐ 5** 加分：可以寫總方程式 2H₂O(l) → 2H₂(g) + O₂(g)</p>`,
+   model_en:`<strong>Model Answer:</strong><br><br>
+(a) <strong>Anode:</strong> O₂ (oxygen)<br>
+<strong>Cathode:</strong> H₂ (hydrogen)<br><br>
+(b) <strong>Half equations:</strong><br>
+Anode (oxidation): 4OH⁻ → O₂ + 2H₂O + 4e⁻<br>
+Cathode (reduction): 2H⁺ + 2e⁻ → H₂<br><br>
+(c) In dilute H₂SO₄, H⁺ and OH⁻ come from water auto-ionisation. Electrolysis consumes H⁺ (cathode) and OH⁻ (anode), but SO₄²⁻ remains. Water is electrolysed (2H₂O → 2H₂ + O₂), so relative H₂SO₄ concentration increases → [H⁺] increases → pH decreases.
+<p style="color:var(--gold)">⭐ 5** bonus: Write overall equation 2H₂O(l) → 2H₂(g) + O₂(g)</p>`},
+
+  {topic:"Bonding",
+   q_zh:"比較 CO₂ 和 SiO₂ 的結構和性質。解釋為什麼 CO₂ 在室溫是氣體而 SiO₂ 是高熔點固體。（5 分）",
+   q_en:"Compare the structure and properties of CO₂ and SiO₂. Explain why CO₂ is a gas at room temperature while SiO₂ is a high-melting-point solid. (5 marks)",
+   model_zh:`<strong>Model Answer:</strong><br><br>
+<strong>CO₂ — 簡單分子結構：</strong><br>
+• C=O 雙鍵形成線性分子 O=C=O<br>
+• 分子間只有微弱的范德華力<br>
+• 只需很少能量就能克服分子間引力<br>
+• 熔點低（-78°C 升華），室溫下是氣體<br><br>
+<strong>SiO₂ — 巨型共價結構：</strong><br>
+• 每個 Si 原子與 4 個 O 原子以單鍵連接<br>
+• 形成3D四面體網絡結構<br>
+• 需要打破大量強烈的 Si-O 共價鍵才能熔化<br>
+• 熔點極高（約 1700°C）<br><br>
+<strong>關鍵差異：</strong>雖然 C 和 Si 都是 Group IV 元素，但 C 能形成穩定的 C=O 雙鍵（pπ-pπ 重疊），而 Si 的 3p 軌道太大，不能有效形成 pπ-pπ 鍵，所以 Si 只能形成單鍵網絡結構。
+<p style="color:var(--gold)">⭐ 5** 關鍵字：giant covalent structure、simple molecular structure、van der Waals' forces、pπ-pπ overlap</p>`,
+   model_en:`<strong>Model Answer:</strong><br><br>
+<strong>CO₂ — Simple molecular structure:</strong><br>
+• C=O double bonds form linear O=C=O molecules<br>
+• Only weak van der Waals' forces between molecules<br>
+• Very little energy needed to overcome intermolecular forces<br>
+• Low melting point (sublimes at -78°C), gas at room temperature<br><br>
+<strong>SiO₂ — Giant covalent structure:</strong><br>
+• Each Si atom bonds to 4 O atoms via single covalent bonds<br>
+• Forms a 3D tetrahedral network<br>
+• Must break many strong Si-O covalent bonds to melt<br>
+• Very high melting point (~1700°C)<br><br>
+<strong>Key difference:</strong> Although both C and Si are Group IV, C forms stable C=O double bonds (pπ-pπ overlap), while Si's 3p orbitals are too large for effective pπ-pπ bonding, so Si only forms single-bond network structures.
+<p style="color:var(--gold)">⭐ 5** Keywords: giant covalent structure, simple molecular structure, van der Waals' forces, pπ-pπ overlap</p>`},
+
+  {topic:"Mole Calculation",
+   q_zh:"2.0 g 的碳酸鈣（CaCO₃）與過量的稀鹽酸反應。(a) 寫出化學方程式 (b) 計算產生的 CO₂ 氣體在 RTP 下的體積（dm³）(c) 如果實際收集到的 CO₂ 只有 0.38 dm³，計算百分產率。（Ca=40, C=12, O=16）（6 分）",
+   q_en:"2.0 g of calcium carbonate (CaCO₃) reacts with excess dilute hydrochloric acid. (a) Write the chemical equation (b) Calculate the volume of CO₂ produced at RTP in dm³ (c) If only 0.38 dm³ of CO₂ is actually collected, calculate the percentage yield. (Ca=40, C=12, O=16) (6 marks)",
+   model_zh:`<strong>Model Answer:</strong><br><br>
+(a) CaCO₃(s) + 2HCl(aq) → CaCl₂(aq) + H₂O(l) + CO₂(g)<br><br>
+(b) <strong>計算：</strong><br>
+M(CaCO₃) = 40 + 12 + 16×3 = 100 g mol⁻¹<br>
+n(CaCO₃) = 2.0 / 100 = 0.020 mol<br>
+由方程式：n(CO₂) = n(CaCO₃) = 0.020 mol<br>
+V(CO₂) = 0.020 × 24 = <strong>0.48 dm³</strong><br><br>
+(c) <strong>百分產率：</strong><br>
+% yield = (0.38 / 0.48) × 100% = <strong>79.2%</strong><br><br>
+<p style="color:var(--gold)">⭐ 5** 常見錯誤：忘記 CaCO₃ 的摩爾質量是 100 不是 84（Ca=40 不是 20）</p>`,
+   model_en:`<strong>Model Answer:</strong><br><br>
+(a) CaCO₃(s) + 2HCl(aq) → CaCl₂(aq) + H₂O(l) + CO₂(g)<br><br>
+(b) <strong>Calculation:</strong><br>
+M(CaCO₃) = 40 + 12 + 16×3 = 100 g mol⁻¹<br>
+n(CaCO₃) = 2.0 / 100 = 0.020 mol<br>
+From equation: n(CO₂) = n(CaCO₃) = 0.020 mol<br>
+V(CO₂) = 0.020 × 24 = <strong>0.48 dm³</strong><br><br>
+(c) <strong>Percentage yield:</strong><br>
+% yield = (0.38 / 0.48) × 100% = <strong>79.2%</strong><br><br>
+<p style="color:var(--gold)">⭐ 5** Common error: forgetting CaCO₃ molar mass is 100 not 84</p>`},
+
+  {topic:"Rate of Reaction",
+   q_zh:"設計一個實驗來研究溫度對硫代硫酸鈉（Na₂S₂O₃）與稀鹽酸反應速率的影響。(a) 描述實驗步驟 (b) 如何量度反應速率 (c) 預測結果並用碰撞理論解釋。（7 分）",
+   q_en:"Design an experiment to investigate the effect of temperature on the reaction rate between sodium thiosulphate (Na₂S₂O₃) and dilute hydrochloric acid. (a) Describe the procedure (b) How to measure reaction rate (c) Predict the result and explain using collision theory. (7 marks)",
+   model_zh:`<strong>Model Answer:</strong><br><br>
+<strong>反應：</strong>Na₂S₂O₃(aq) + 2HCl(aq) → 2NaCl(aq) + H₂O(l) + SO₂(g) + S(s)↓<br><br>
+(a) <strong>實驗步驟：</strong><br>
+1. 量取 50 cm³ 的 0.1 M Na₂S₂O₃ 溶液放入燒杯<br>
+2. 將燒杯放在畫有「✕」標記的白紙上<br>
+3. 加熱 Na₂S₂O₃ 到目標溫度（如 30°C、40°C、50°C、60°C）<br>
+4. 量取 5 cm³ 的 1.0 M HCl<br>
+5. 迅速將 HCl 加入 Na₂S₂O₃，開始計時<br>
+6. 從上方觀察，當「✕」完全被硫沉澱遮住時停止計時<br>
+7. 在每個溫度重複 3 次，取平均值<br><br>
+(b) <strong>量度方法：</strong>記錄「✕」消失所需的時間。時間越短 = 反應越快。rate = 1/time<br><br>
+(c) <strong>預測與解釋：</strong><br>
+溫度升高 → 反應時間縮短（速率增加）<br>
+碰撞理論：溫度↑ → 粒子的平均動能增加 → 更多粒子的能量 ≥ 活化能 Ea → 單位時間內有效碰撞頻率增加 → 反應速率增加。
+<p style="color:var(--gold)">⭐ 5** 必寫：控制變量（濃度、體積不變）、重複實驗取平均、「effective collisions per unit time」</p>`,
+   model_en:`<strong>Model Answer:</strong><br><br>
+<strong>Reaction:</strong> Na₂S₂O₃(aq) + 2HCl(aq) → 2NaCl(aq) + H₂O(l) + SO₂(g) + S(s)↓<br><br>
+(a) <strong>Procedure:</strong><br>
+1. Measure 50 cm³ of 0.1 M Na₂S₂O₃ into a beaker<br>
+2. Place beaker on white paper with an "✕" mark<br>
+3. Heat Na₂S₂O₃ to target temperature (e.g. 30, 40, 50, 60°C)<br>
+4. Measure 5 cm³ of 1.0 M HCl<br>
+5. Quickly add HCl to Na₂S₂O₃, start timer<br>
+6. View from above; stop timer when "✕" disappears (obscured by sulphur precipitate)<br>
+7. Repeat 3 times at each temperature, take average<br><br>
+(b) <strong>Measurement:</strong> Record time for "✕" to disappear. Shorter time = faster reaction. rate = 1/time<br><br>
+(c) <strong>Prediction & explanation:</strong><br>
+Higher temperature → shorter reaction time (faster rate)<br>
+Collision theory: T↑ → average KE increases → more particles with energy ≥ Ea → more effective collisions per unit time → rate increases.
+<p style="color:var(--gold)">⭐ 5** Must-include: controlled variables (concentration, volume), repeat experiments, "effective collisions per unit time"</p>`},
+
+  {topic:"Organic Chemistry",
+   q_zh:"丙酸（CH₃CH₂COOH）與丙醇（CH₃CH₂CH₂OH）在 H⁺ 催化下反應。(a) 寫出反應方程式 (b) 命名產物 (c) 描述如何用實驗區分丙酸和丙醇（寫兩個測試）。（5 分）",
+   q_en:"Propanoic acid (CH₃CH₂COOH) reacts with propan-1-ol (CH₃CH₂CH₂OH) catalysed by H⁺. (a) Write the equation (b) Name the product (c) Describe two tests to distinguish propanoic acid from propan-1-ol. (5 marks)",
+   model_zh:`<strong>Model Answer:</strong><br><br>
+(a) CH₃CH₂COOH + CH₃CH₂CH₂OH ⇌ CH₃CH₂COOCH₂CH₂CH₃ + H₂O<br>
+（酯化反應，可逆，H⁺ 催化 + 加熱）<br><br>
+(b) 產物命名：<strong>Propyl propanoate</strong>（丙酸丙酯）<br>
+命名規則：alkyl group（來自醇）+ alkanoate（來自酸）<br><br>
+(c) <strong>測試1：加入 NaHCO₃（碳酸氫鈉）</strong><br>
+丙酸：有氣泡產生（CO₂），CH₃CH₂COOH + NaHCO₃ → CH₃CH₂COONa + H₂O + CO₂<br>
+丙醇：無反應（醇不與 NaHCO₃ 反應）<br><br>
+<strong>測試2：加入 K₂Cr₂O₇/H⁺（酸化重鉻酸鉀）</strong><br>
+丙醇：橙色→綠色（丙醇被氧化為丙醛/丙酸）<br>
+丙酸：無顏色變化（羧酸不能被 K₂Cr₂O₇ 進一步氧化）
+<p style="color:var(--gold)">⭐ 5** 關鍵：NaHCO₃ 測試是區分酸和非酸的最佳方法（只有羧酸有反應）</p>`,
+   model_en:`<strong>Model Answer:</strong><br><br>
+(a) CH₃CH₂COOH + CH₃CH₂CH₂OH ⇌ CH₃CH₂COOCH₂CH₂CH₃ + H₂O<br>
+(esterification, reversible, H⁺ catalyst + heat)<br><br>
+(b) Product name: <strong>Propyl propanoate</strong><br>
+Naming: alkyl group (from alcohol) + alkanoate (from acid)<br><br>
+(c) <strong>Test 1: Add NaHCO₃ (sodium hydrogencarbonate)</strong><br>
+Propanoic acid: effervescence (CO₂), CH₃CH₂COOH + NaHCO₃ → CH₃CH₂COONa + H₂O + CO₂<br>
+Propan-1-ol: no reaction (alcohols don't react with NaHCO₃)<br><br>
+<strong>Test 2: Add K₂Cr₂O₇/H⁺ (acidified dichromate)</strong><br>
+Propan-1-ol: orange → green (oxidised to propanal/propanoic acid)<br>
+Propanoic acid: no colour change (carboxylic acids can't be further oxidised by K₂Cr₂O₇)
+<p style="color:var(--gold)">⭐ 5** Key: NaHCO₃ test is the best way to distinguish acids from non-acids (only carboxylic acids react)</p>`},
+
+  {topic:"Metals",
+   q_zh:"解釋為什麼 (a) 鋁雖然很活潑但可以用來製造窗框 (b) 鋅塊可以附在船的鋼殼上來防止腐蝕。（5 分）",
+   q_en:"Explain why (a) aluminium, despite being very reactive, can be used to make window frames (b) zinc blocks can be attached to a ship's steel hull to prevent corrosion. (5 marks)",
+   model_zh:`<strong>Model Answer:</strong><br><br>
+(a) <strong>鋁的抗氧化性：</strong><br>
+鋁是活潑金屬（活性序高於 Zn 和 Fe），但鋁與空氣中的 O₂ 反應時，表面會形成一層<strong>致密、堅硬的氧化鋁薄膜（Al₂O₃）</strong>。這層薄膜：<br>
+• 緊密附著在鋁的表面<br>
+• 阻止氧氣和水進一步接觸鋁<br>
+• 自我修復（刮損後會重新形成）<br>
+因此鋁看起來「不活潑」，實際上是被保護了。這就是為什麼港鐵的鋁窗框不會生鏽！<br><br>
+(b) <strong>犧牲保護（Sacrificial Protection）：</strong><br>
+鋅在活性序中比鐵高（更活潑）。當鋅和鐵同時接觸電解質（海水）時：<br>
+• 鋅優先被氧化：Zn → Zn²⁺ + 2e⁻<br>
+• 電子通過金屬接觸流向鐵，保護鐵不被氧化<br>
+• 鋅「犧牲」自己保護鐵<br>
+這就是犧牲保護。鋅塊需要定期更換。
+<p style="color:var(--gold)">⭐ 5** 關鍵字：protective oxide layer、sacrificial protection、more reactive、electrolyte</p>`,
+   model_en:`<strong>Model Answer:</strong><br><br>
+(a) <strong>Aluminium's corrosion resistance:</strong><br>
+Al is reactive (above Zn and Fe in reactivity series), but reacts with O₂ to form a <strong>dense, hard oxide layer (Al₂O₃)</strong> on the surface. This layer:<br>
+• Adheres tightly to Al surface<br>
+• Prevents further contact between O₂/H₂O and Al<br>
+• Self-repairing (reforms if scratched)<br>
+So Al appears "unreactive" — it's actually protected. That's why MTR aluminium frames don't rust!<br><br>
+(b) <strong>Sacrificial Protection:</strong><br>
+Zn is more reactive than Fe in the reactivity series. When both contact an electrolyte (seawater):<br>
+• Zn is preferentially oxidised: Zn → Zn²⁺ + 2e⁻<br>
+• Electrons flow to Fe through metal contact, preventing Fe oxidation<br>
+• Zn "sacrifices" itself to protect Fe<br>
+Zinc blocks must be replaced periodically.
+<p style="color:var(--gold)">⭐ 5** Keywords: protective oxide layer, sacrificial protection, more reactive, electrolyte</p>`}
 ];
 
 function renderSQ(){
@@ -1479,6 +2100,35 @@ const fcData=[
   {cat:'redox',front:'Anode discharge order',back:'OH⁻ > Br⁻ > Cl⁻(conc) > I⁻ > SO₄²⁻ > NO₃⁻'},
   {cat:'mole',front:'% yield formula',back_zh:'實際產量 ÷ 理論產量 × 100%',back_en:'Actual yield ÷ Theoretical yield × 100%'},
   {cat:'mole',front:'Atom economy',back_zh:'所需產物的摩爾質量 ÷ 所有產物摩爾質量總和 × 100%',back_en:'Molar mass of desired product ÷ Sum of molar masses of all products × 100%'},
+
+  // === NEW FLASHCARDS (18-42) ===
+  {cat:'mole',front:'Avogadro constant',back:'L = 6.02 × 10²³ mol⁻¹'},
+  {cat:'mole',front:'Converting g → mol',back:'mol = mass (g) ÷ M (g mol⁻¹)'},
+  {cat:'mole',front:'Converting mol → g',back:'mass = n × M'},
+  {cat:'mole',front:'Gas volume at RTP',back:'V = n × 24 dm³ (at RTP, ~25°C, 1 atm)'},
+  {cat:'mole',front:'Molarity formula',back:'M = n / V (mol dm⁻³)'},
+  {cat:'bond',front:'Metallic Bond',back_zh:'正金屬離子浸在離域電子海中 → 導電、延展性好',back_en:'Positive metal ions in sea of delocalised electrons → conducts electricity, malleable'},
+  {cat:'bond',front:'Giant ionic properties',back_zh:'高熔點、固態不導電、溶於水導電、脆',back_en:'High mp, non-conductive solid, conducts in solution, brittle'},
+  {cat:'bond',front:'Simple molecular properties',back_zh:'低熔點、不導電、通常溶於非極性溶劑',back_en:'Low mp, non-conductive, usually soluble in non-polar solvents'},
+  {cat:'bond',front:'Giant covalent properties',back_zh:'極高熔點、堅硬（鑽石）或層狀（石墨）、不溶',back_en:'Very high mp, hard (diamond) or layered (graphite), insoluble'},
+  {cat:'bond',front:'Graphite conducts because',back_zh:'每個 C 只有 3 個共價鍵，第 4 個電子是離域電子',back_en:'Each C forms only 3 covalent bonds; 4th electron is delocalised'},
+  {cat:'organic',front:'Alcohol → Alkene',back:'C₂H₅OH → CH₂=CH₂ + H₂O (conc. H₂SO₄, 170°C, elimination)'},
+  {cat:'organic',front:'Cracking',back_zh:'長鏈烷烴 → 短鏈烷烴 + 烯烴（高溫+催化劑）',back_en:'Long-chain alkane → shorter alkane + alkene (high T + catalyst)'},
+  {cat:'organic',front:'Bromine water test',back_zh:'烯烴使紅棕色溴水褪色（加成反應）',back_en:'Alkenes decolourise reddish-brown bromine water (addition)'},
+  {cat:'organic',front:'Functional group: -OH',back_zh:'Alcohol 醇，後綴 -ol',back_en:'Alcohol, suffix -ol'},
+  {cat:'organic',front:'Functional group: -COOH',back_zh:'Carboxylic acid 羧酸，後綴 -oic acid',back_en:'Carboxylic acid, suffix -oic acid'},
+  {cat:'organic',front:'Functional group: -CHO',back_zh:'Aldehyde 醛，後綴 -al',back_en:'Aldehyde, suffix -al'},
+  {cat:'organic',front:'Functional group: >C=O',back_zh:'Ketone 酮，後綴 -one',back_en:'Ketone, suffix -one'},
+  {cat:'organic',front:'Functional group: -COO-',back_zh:'Ester 酯，後綴 -oate',back_en:'Ester, suffix -oate'},
+  {cat:'redox',front:'Displacement reaction',back_zh:'較活潑金屬把較不活潑金屬從其鹽溶液中置換出來',back_en:'More reactive metal displaces less reactive metal from its salt solution'},
+  {cat:'redox',front:'Rusting equation',back:'4Fe + 3O₂ + 2xH₂O → 2Fe₂O₃·xH₂O'},
+  {cat:'redox',front:'Sacrificial protection',back_zh:'用更活潑的金屬（如 Zn、Mg）保護 Fe 不被腐蝕',back_en:'Using a more reactive metal (e.g. Zn, Mg) to protect Fe from corrosion'},
+  {cat:'redox',front:'Reducing agent',back_zh:'使其他物質還原（自己被氧化）的物質',back_en:'Substance that reduces another species (itself gets oxidised)'},
+  {cat:'redox',front:'Oxidising agent',back_zh:'使其他物質氧化（自己被還原）的物質',back_en:'Substance that oxidises another species (itself gets reduced)'},
+  {cat:'mole',front:'Empirical formula steps',back_zh:'1. 假設 100g → 各元素質量 2. ÷ Ar 得摩爾數 3. ÷ 最小摩爾數 4. 取整數比',back_en:'1. Assume 100g 2. ÷ Ar for moles 3. ÷ smallest mole value 4. Round to integer ratio'},
+  {cat:'bond',front:'Electronegativity trend',back_zh:'同一週期→右增，同一族→下減。F 最大',back_en:'Across period → increases. Down group → decreases. F is highest.'},
+  {cat:'bond',front:'Shell: max electrons',back:'Shell 1: 2, Shell 2: 8, Shell 3: 18, Shell 4: 32 (2n²)'},
+  {cat:'organic',front:'Condensation polymerisation',back_zh:'單體之間失去小分子（如 H₂O）形成聚合物',back_en:'Monomers lose small molecules (e.g. H₂O) to form polymer'}
 ];
 let fcIdx=0,fcDeck='all';
 function getFcSet(){return fcDeck==='all'?fcData:fcData.filter(f=>f.cat===fcDeck)}
@@ -1524,6 +2174,94 @@ setLang=function(l){
 };
 
 init();
+
+// ===== AI TUTOR (GLM-5.1) =====
+const AI_KEY='bc604bbc774c49528e8615564aa51ea3.f0Hzibmlxdd5bKGZ';
+const AI_URL='https://api.z.ai/api/coding/paas/v4/chat/completions';
+let aiHistory=[];
+
+function aiSend(){
+  const inp=document.getElementById('aiInput');
+  const msg=inp.value.trim();
+  if(!msg)return;
+  inp.value='';
+  aiAsk(msg);
+}
+
+function aiAsk(msg){
+  const msgs=document.getElementById('aiMessages');
+  // Add user message
+  msgs.innerHTML+=`<div class="ai-msg user">${escHtml(msg)}</div>`;
+  msgs.scrollTop=msgs.scrollHeight;
+
+  // Show typing indicator
+  const typingId='typing_'+Date.now();
+  msgs.innerHTML+=`<div class="ai-typing" id="${typingId}"><span>●</span><span>●</span><span>●</span></div>`;
+  msgs.scrollTop=msgs.scrollHeight;
+
+  aiHistory.push({role:'user',content:msg});
+
+  const sysPrompt=`You are an expert DSE Chemistry tutor. You teach Hong Kong DSE Chemistry (HKDSE) at the highest level (5**).
+Rules:
+- Answer in the same language as the student's question (Chinese or English)
+- Be detailed but clear. Use bullet points and numbered steps.
+- Include relevant chemical equations.
+- Give real DSE exam tips when appropriate.
+- If asked about a specific topic, include: key concepts, common mistakes, past paper analysis, and 5** tips.
+- Use 8️⃣ structure when giving step-by-step explanations.
+- Keep formatting clean with markdown-style formatting.
+Topics covered: Mole calculations, Chemical bonding, Electrolysis, Chemical equilibrium, Organic chemistry, Rate of reaction, Acids & bases, Redox, Metals, Atomic structure, Periodic table, Industrial chemistry, Energy changes, Separation techniques.`;
+
+  const body={
+    model:'glm-5.1',
+    messages:[{role:'system',content:sysPrompt},...aiHistory.slice(-20)],
+    temperature:0.7,
+    max_tokens:2000
+  };
+
+  fetch(AI_URL,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+AI_KEY},
+    body:JSON.stringify(body)
+  })
+  .then(r=>r.json())
+  .then(data=>{
+    const el=document.getElementById(typingId);
+    if(el)el.remove();
+    const reply=data.choices?.[0]?.message?.content||'抱歉，暫時無法回應。請再試一次。';
+    aiHistory.push({role:'assistant',content:reply});
+    msgs.innerHTML+=`<div class="ai-msg bot">${formatAI(reply)}</div>`;
+    msgs.scrollTop=msgs.scrollHeight;
+  })
+  .catch(err=>{
+    const el=document.getElementById(typingId);
+    if(el)el.remove();
+    msgs.innerHTML+=`<div class="ai-msg bot">⚠️ 網絡錯誤，請檢查連接後重試。</div>`;
+    msgs.scrollTop=msgs.scrollHeight;
+  });
+}
+
+function escHtml(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function formatAI(t){
+  return escHtml(t)
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/```(\w*)\n?([\s\S]*?)```/g,'<div style="background:rgba(255,255,255,.05);padding:10px;border-radius:8px;margin:6px 0;font-size:12px;font-family:monospace;overflow-x:auto">$2</div>')
+    .replace(/`(.*?)`/g,'<code style="background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px;font-size:12px">$1</code>')
+    .replace(/\n/g,'<br>');
+}
+
+// Show/hide floating AI button based on active tab
+const origSwitchTab=switchTab;
+switchTab=function(tab){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(tab)?.classList.add('active');
+  document.querySelector(`[data-tab="${tab}"]`)?.classList.add('active');
+  const fb=document.getElementById('aiFloatBtn');
+  if(fb)fb.style.display=tab==='aitutor'?'none':'flex';
+};
+// Init floating button visibility
+setTimeout(()=>{const fb=document.getElementById('aiFloatBtn');if(fb)fb.style.display='flex';},100);
 </script>
 </body>
 </html>
