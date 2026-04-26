@@ -4192,6 +4192,7 @@ function filterPP(year){
         ${opts.map((o,j)=>`<div class="quiz-opt ${answered?(j===q.ans?'correct':j===userAns?'wrong':''):''}" onclick="selectPP(${qi},${j})" id="ppopt${qi}_${j}"><div class="opt-letter">${'ABCD'[j]}</div><span>${o}</span></div>`).join('')}
       </div>
       ${answered?`<div class="quiz-expl show"><h4>💡 <span class="zh-only">解釋</span><span class="en-only">Explanation</span></h4><p>${lang==='zh'?q.exp_zh:q.exp_en}</p></div>`:''}
+      <button onclick="askAIAboutQuestion(${qi})" style="margin-top:8px;padding:6px 14px;border:1px solid rgba(108,92,231,.4);border-radius:8px;background:rgba(108,92,231,.08);color:var(--pri-l);cursor:pointer;font-size:12px;font-weight:600;transition:.2s" onmouseover="this.style.background='rgba(108,92,231,.18)'" onmouseout="this.style.background='rgba(108,92,231,.08)'">🤖 <span class="zh-only">問 AI 詳細解釋</span><span class="en-only">Ask AI for Details</span></button>
     </div>`;
   });
 
@@ -4236,6 +4237,7 @@ function filterPPByTopic(topic){
         ${opts.map((o,j)=>`<div class="quiz-opt ${answered?(j===q.ans?'correct':j===userAns?'wrong':''):''}" onclick="selectPP(${qi},${j})" id="ppopt${qi}_${j}"><div class="opt-letter">${'ABCD'[j]}</div><span>${o}</span></div>`).join('')}
       </div>
       ${answered?`<div class="quiz-expl show"><h4>💡 <span class="zh-only">解釋</span><span class="en-only">Explanation</span></h4><p>${lang==='zh'?q.exp_zh:q.exp_en}</p></div>`:''}
+      <button onclick="askAIAboutQuestion(${qi})" style="margin-top:8px;padding:6px 14px;border:1px solid rgba(108,92,231,.4);border-radius:8px;background:rgba(108,92,231,.08);color:var(--pri-l);cursor:pointer;font-size:12px;font-weight:600;transition:.2s" onmouseover="this.style.background='rgba(108,92,231,.18)'" onmouseout="this.style.background='rgba(108,92,231,.08)'">🤖 <span class="zh-only">問 AI 詳細解釋</span><span class="en-only">Ask AI for Details</span></button>
     </div>`;
   });
   area.innerHTML=html;
@@ -4626,6 +4628,69 @@ async function syncFromCloud(){
 const AI_KEY='bc604bbc774c49528e8615564aa51ea3.f0Hzibmlxdd5bKGZ';
 const AI_URL='https://api.z.ai/api/coding/paas/v4/chat/completions';
 let aiHistory=[];
+
+// 「問 AI」按鈕：針對某條題目打開 AI 對話盒並自動發問
+function askAIAboutQuestion(qi){
+  const q=quizData[qi];
+  if(!q)return;
+  const lang=document.body.getAttribute('data-lang');
+  
+  // 確保 AI 對話盒打開
+  const aiBox=document.getElementById('aiBox');
+  const aiToggle=document.getElementById('aiToggle');
+  if(aiBox)aiBox.classList.add('open');
+  if(aiToggle)aiToggle.style.display='none';
+  
+  // 構建題目文字
+  const qText=lang==='zh'?q.q_zh:q.q_en;
+  const opts=lang==='zh'?q.opts_zh:q.opts_en;
+  const optionsText=opts.map((o,j)=>`${'ABCD'[j]}. ${o}`).join('\n');
+  const correctLetter='ABCD'[q.ans];
+  const topic=q.topic;
+  const year=q.year||'';
+  
+  const prompt=lang==='zh'
+    ?`請針對以下 DSE 化學 MC 題目，一步一步詳細解釋：
+
+📖 題目（課題：${topic}${year?' · DSE '+year:''}）：
+${qText}
+
+選項：
+${optionsText}
+
+✅ 正確答案：${correctLetter}
+
+請按以下格式回答：
+1. **先講正確答案是什麼**，為什麼正確
+2. **逐一分析每個選項**，解釋對或錯的原因
+3. **背後的化學概念**是什麼（用簡單方式講解）
+4. **DSE 考試貼士**：這類題目的常見陷阱和記憶技巧
+5. 如果有相關的化學方程式，請列出來`
+    :`Please explain this DSE Chemistry MC question step by step:
+
+📖 Question (Topic: ${topic}${year?' · DSE '+year:''}):
+${qText}
+
+Options:
+${optionsText}
+
+✅ Correct Answer: ${correctLetter}
+
+Please answer in this format:
+1. **State the correct answer** and why it's correct
+2. **Analyze each option** — explain why each is right or wrong
+3. **Underlying chemistry concept** (explain in simple terms)
+4. **DSE exam tips**: common traps and memory techniques for this type
+5. Include relevant chemical equations if applicable`;
+  
+  // 清除之前的對話歷史，設定題目上下文
+  aiHistory=[];
+  const msgs=document.getElementById('aiMessages');
+  msgs.innerHTML=`<div class="ai-msg bot"><span class="zh-only">🧪 正在分析第 ${qi+1} 題（${topic}）...</span><span class="en-only">🧪 Analyzing Question ${qi+1} (${topic})...</span></div>`;
+  
+  // 自動發送
+  aiAsk(prompt);
+}
 
 function aiSend(){
   const inp=document.getElementById('aiInput');
