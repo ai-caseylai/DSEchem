@@ -240,6 +240,28 @@ footer{text-align:center;padding:30px 16px;color:var(--dim);font-size:11px;borde
 .ai-sug{background:rgba(108,92,231,.15);color:var(--pri-l);border:1px solid rgba(108,92,231,.3);border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;transition:.2s}
 .ai-sug:hover{background:rgba(108,92,231,.25)}
 
+/* AI Modal */
+.ai-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);animation:fadeIn .2s}
+.ai-modal-overlay.open{display:flex}
+.ai-modal{background:var(--bg);border:1px solid var(--bdr);border-radius:20px;width:min(520px,calc(100vw - 24px));height:min(680px,calc(100vh - 40px));display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.6);animation:modalPop .3s ease}
+@keyframes modalPop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+.ai-modal-header{padding:16px 20px;background:linear-gradient(135deg,var(--pri),#4a3f8a);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.ai-modal-header h3{font-size:15px;font-weight:700;color:#fff;flex:1}
+.ai-modal-header .ai-modal-close{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:4px 8px;border-radius:8px;transition:.2s}
+.ai-modal-header .ai-modal-close:hover{background:rgba(255,255,255,.15)}
+.ai-modal-q{padding:14px 18px;border-bottom:1px solid var(--bdr);background:var(--card);font-size:13px;line-height:1.6;max-height:120px;overflow-y:auto;flex-shrink:0}
+.ai-modal-q .q-tag{display:inline-block;background:rgba(255,215,0,.15);color:var(--gold);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;margin-right:6px}
+.ai-modal-q .q-text{color:var(--txt);margin-top:6px}
+.ai-modal-msgs{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:10px}
+.ai-modal-msgs .ai-msg{max-width:92%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.7;white-space:pre-wrap}
+.ai-modal-msgs .ai-msg.bot{background:var(--card2);color:var(--txt);align-self:flex-start;border-bottom-left-radius:4px}
+.ai-modal-msgs .ai-msg.user{background:var(--pri);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.ai-modal-input{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--bdr);flex-shrink:0;background:var(--card)}
+.ai-modal-input input{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--bdr);border-radius:10px;padding:10px 14px;color:var(--txt);font-size:13px;outline:none}
+.ai-modal-input input:focus{border-color:var(--pri)}
+.ai-modal-input button{background:var(--pri);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer;font-size:13px}
+.ai-modal-input button:hover{opacity:.9}
+
 /* Comic & Blog */
 .comic-strip{display:flex;gap:12px;margin:16px 0;overflow-x:auto;padding:8px 0;scrollbar-width:none}
 .comic-strip::-webkit-scrollbar{display:none}
@@ -1990,6 +2012,24 @@ Ask me any chemistry question!</span></div>
 
 <!-- Floating AI Button -->
 <button class="ai-toggle" id="aiFloatBtn" onclick="switchTab('aitutor')">🤖</button>
+
+<!-- AI 解題 Modal -->
+<div class="ai-modal-overlay" id="aiModalOverlay" onclick="if(event.target===this)closeAIModal()">
+  <div class="ai-modal">
+    <div class="ai-modal-header">
+      <h3 id="aiModalTitle">🧪 AI 解題助手</h3>
+      <button class="ai-modal-close" onclick="closeAIModal()">✕</button>
+    </div>
+    <div class="ai-modal-q" id="aiModalQuestion"></div>
+    <div class="ai-modal-msgs" id="aiModalMsgs">
+      <div class="ai-msg bot">🧪 正在分析題目...</div>
+    </div>
+    <div class="ai-modal-input">
+      <input type="text" id="aiModalInput" placeholder="追問..." onkeydown="if(event.key==='Enter')aiModalSend()">
+      <button onclick="aiModalSend()"><span class="zh-only">發送</span><span class="en-only">Send</span></button>
+    </div>
+  </div>
+</div>
 
 <!-- ===== BLOG / ABOUT SECTION ===== -->
 <div class="section" id="about">
@@ -4630,15 +4670,12 @@ const AI_URL='https://api.z.ai/api/coding/paas/v4/chat/completions';
 let aiHistory=[];
 
 // 「問 AI」按鈕：針對某條題目打開 AI 對話盒並自動發問
+let aiModalHistory=[];
+
 function askAIAboutQuestion(qi){
   const q=quizData[qi];
   if(!q)return;
   const lang=document.body.getAttribute('data-lang');
-  
-  // 切換到 AI Tutor tab
-  switchTab('aitutor');
-  // 滾動到頂部
-  window.scrollTo({top:0,behavior:'smooth'});
   
   // 構建題目文字
   const qText=lang==='zh'?q.q_zh:q.q_en;
@@ -4648,6 +4685,24 @@ function askAIAboutQuestion(qi){
   const topic=q.topic;
   const year=q.year||'';
   
+  // 填入題目到 modal
+  document.getElementById('aiModalTitle').innerHTML=`🧪 <span class="zh-only">AI 解題</span><span class="en-only">AI Explainer</span> · ${topic}${year?' · DSE '+year:''}`;
+  document.getElementById('aiModalQuestion').innerHTML=`
+    <span class="q-tag">${topic}</span>${year?'<span class="q-tag">📅 DSE '+year+'</span>':''}
+    <div class="q-text">${qText}</div>
+    <div style="margin-top:6px;font-size:12px;color:var(--dim)">${opts.map((o,j)=>`<span style="margin-right:10px;${j===q.ans?'color:var(--acc);font-weight:700':'color:var(--dim)'}">${'ABCD'[j]}. ${o}</span>`).join('')}</div>
+  `;
+  
+  // 清空對話
+  aiModalHistory=[];
+  document.getElementById('aiModalMsgs').innerHTML=`<div class="ai-msg bot"><span class="zh-only">🧪 正在分析這條題目，請稍候...</span><span class="en-only">🧪 Analyzing this question, please wait...</span></div>`;
+  document.getElementById('aiModalInput').value='';
+  
+  // 打開 modal
+  document.getElementById('aiModalOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  
+  // 構建 prompt
   const prompt=lang==='zh'
     ?`請針對以下 DSE 化學 MC 題目，一步一步詳細解釋：
 
@@ -4682,13 +4737,91 @@ Please answer in this format:
 4. **DSE exam tips**: common traps and memory techniques for this type
 5. Include relevant chemical equations if applicable`;
   
-  // 清除之前的對話歷史，設定題目上下文
-  aiHistory=[];
-  const msgs=document.getElementById('aiMessages');
-  msgs.innerHTML=`<div class="ai-msg bot"><span class="zh-only">🧪 正在分析第 ${qi+1} 題（${topic}）...</span><span class="en-only">🧪 Analyzing Question ${qi+1} (${topic})...</span></div>`;
+  // 發送給 AI
+  aiModalHistory.push({role:'user',content:prompt});
   
-  // 自動發送
-  aiAsk(prompt);
+  const sysPrompt=`You are an expert DSE Chemistry tutor. You teach Hong Kong DSE Chemistry (HKDSE) at the highest level (5**).
+Rules:
+- Answer in the same language as the student's question (Chinese or English)
+- Be detailed but clear. Use bullet points and numbered steps.
+- Include relevant chemical equations.
+- Give real DSE exam tips when appropriate.
+- Keep formatting clean with markdown-style formatting.
+Topics covered: Mole calculations, Chemical bonding, Electrolysis, Chemical equilibrium, Organic chemistry, Rate of reaction, Acids & bases, Redox, Metals, Atomic structure, Periodic table, Industrial chemistry, Energy changes, Separation techniques.`;
+
+  const msgs=document.getElementById('aiModalMsgs');
+  const typingId='mtype_'+Date.now();
+  msgs.innerHTML+=`<div class="ai-typing" id="${typingId}" style="font-size:12px;color:var(--dim);padding:4px 12px;align-self:flex-start"><span>●</span><span>●</span><span>●</span></div>`;
+  msgs.scrollTop=msgs.scrollHeight;
+
+  fetch(AI_URL,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+AI_KEY},
+    body:JSON.stringify({model:'glm-5.1',messages:[{role:'system',content:sysPrompt},...aiModalHistory.slice(-20)],temperature:0.7,max_tokens:2000})
+  })
+  .then(r=>r.json())
+  .then(data=>{
+    const el=document.getElementById(typingId);
+    if(el)el.remove();
+    const reply=data.choices?.[0]?.message?.content||'抱歉，暫時無法回應。請再試一次。';
+    aiModalHistory.push({role:'assistant',content:reply});
+    msgs.innerHTML+=`<div class="ai-msg bot">${formatAI(reply)}</div>`;
+    msgs.scrollTop=msgs.scrollHeight;
+  })
+  .catch(()=>{
+    const el=document.getElementById(typingId);
+    if(el)el.remove();
+    msgs.innerHTML+=`<div class="ai-msg bot">⚠️ 網絡錯誤，請檢查連接後重試。</div>`;
+    msgs.scrollTop=msgs.scrollHeight;
+  });
+}
+
+function closeAIModal(){
+  document.getElementById('aiModalOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+function aiModalSend(){
+  const inp=document.getElementById('aiModalInput');
+  const msg=inp.value.trim();
+  if(!msg)return;
+  inp.value='';
+  const msgs=document.getElementById('aiModalMsgs');
+  msgs.innerHTML+=`<div class="ai-msg user">${escHtml(msg)}</div>`;
+  msgs.scrollTop=msgs.scrollHeight;
+  aiModalHistory.push({role:'user',content:msg});
+
+  const sysPrompt=`You are an expert DSE Chemistry tutor. You teach Hong Kong DSE Chemistry (HKDSE) at the highest level (5**).
+Rules:
+- Answer in the same language as the student's question (Chinese or English)
+- Be detailed but clear. Use bullet points and numbered steps.
+- Include relevant chemical equations.
+- Give real DSE exam tips when appropriate.`;
+
+  const typingId='mtype_'+Date.now();
+  msgs.innerHTML+=`<div class="ai-typing" id="${typingId}" style="font-size:12px;color:var(--dim);padding:4px 12px;align-self:flex-start"><span>●</span><span>●</span><span>●</span></div>`;
+  msgs.scrollTop=msgs.scrollHeight;
+
+  fetch(AI_URL,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+AI_KEY},
+    body:JSON.stringify({model:'glm-5.1',messages:[{role:'system',content:sysPrompt},...aiModalHistory.slice(-20)],temperature:0.7,max_tokens:2000})
+  })
+  .then(r=>r.json())
+  .then(data=>{
+    const el=document.getElementById(typingId);
+    if(el)el.remove();
+    const reply=data.choices?.[0]?.message?.content||'抱歉，暫時無法回應。';
+    aiModalHistory.push({role:'assistant',content:reply});
+    msgs.innerHTML+=`<div class="ai-msg bot">${formatAI(reply)}</div>`;
+    msgs.scrollTop=msgs.scrollHeight;
+  })
+  .catch(()=>{
+    const el=document.getElementById(typingId);
+    if(el)el.remove();
+    msgs.innerHTML+=`<div class="ai-msg bot">⚠️ 網絡錯誤</div>`;
+    msgs.scrollTop=msgs.scrollHeight;
+  });
 }
 
 function aiSend(){
