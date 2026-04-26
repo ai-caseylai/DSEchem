@@ -230,6 +230,7 @@ footer{text-align:center;padding:30px 16px;color:var(--dim);font-size:11px;borde
 .ai-typing span:nth-child(2){animation-delay:.2s}
 .ai-typing span:nth-child(3){animation-delay:.4s}
 @keyframes blink{0%,60%,100%{opacity:.3}30%{opacity:1}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
 .ai-input{display:flex;gap:8px;padding:12px;border-top:1px solid var(--bdr);flex-shrink:0}
 .ai-input input{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--bdr);border-radius:10px;padding:10px 14px;color:var(--txt);font-size:13px;outline:none}
 .ai-input input:focus{border-color:var(--pri)}
@@ -1658,9 +1659,9 @@ footer{text-align:center;padding:30px 16px;color:var(--dim);font-size:11px;borde
   <!-- Review mode info -->
   <div id="ppReviewInfo" style="display:none">
     <div class="callout callout-fire">
-      <strong>🔄 <span class="zh-only">錯題重做模式</span><span class="en-only">Mistake Review Mode</span></strong><br>
-      <span class="zh-only">系統會重複展示你答錯的題目，直到你全部答對為止。每條錯題會附上詳細解釋幫助你理解。做完全部錯題後可點「再來一輪」重複練習。</span>
-      <span class="en-only">The system re-tests questions you got wrong until you get them all correct. Each wrong question comes with detailed explanations. Click "Another Round" to repeat after completing all.</span>
+      <strong>🔄 <span class="zh-only">錯題重做模式（自動保存）</span><span class="en-only">Mistake Review (Auto-saved)</span></strong><br>
+      <span class="zh-only">系統會<strong>永久記錄</strong>你答錯的題目，即使關掉瀏覽器也不會丟失！每條錯題追蹤錯誤次數，連續答對 2 次即標記為「已掌握」✅。按課題分析你的弱點，精準突破！</span>
+      <span class="en-only">The system <strong>permanently saves</strong> your wrong answers — they persist even after closing the browser! Each mistake is tracked, and after 2 consecutive correct answers it's marked as "mastered" ✅. See your weakness breakdown by topic!</span>
     </div>
   </div>
 
@@ -3148,8 +3149,13 @@ function selectAns(qi,ai){
   if(ai===correct){
     quizState.score++;
     document.getElementById(`opt${qi}_${ai}`).classList.add('correct');
+    // 之前錯過但今次答對
+    const book=loadWrongBook();
+    if(book.questions[qi]) recordCorrectNew(qi);
   }else{
     document.getElementById(`opt${qi}_${ai}`).classList.add('wrong');
+    // 記錄到錯題本
+    recordWrong(qi,ai,'mc');
   }
   document.getElementById(`expl${qi}`).classList.add('show');
   updateMcScore();
@@ -3167,6 +3173,7 @@ function updateMcScore(){
 function resetQuiz(){
   quizState={current:0,score:0,answered:new Array(quizData.length).fill(false)};
   renderQuiz();
+  updateWrongBadge();
 }
 
 // ===== STRUCTURED QUESTIONS =====
@@ -3931,6 +3938,105 @@ function setFcDeck(d){fcDeck=d;fcIdx=0;renderFc();}
 // ===== PAST PAPERS BY YEAR =====
 let ppState={answered:{},score:0,mode:'year',wrongQs:[],mockTimer:null,mockStart:null};
 
+// ===== 持久化錯題追蹤系統 =====
+const WRONG_KEY='dse_wrong_book';
+function loadWrongBook(){
+  try{const s=localStorage.getItem(WRONG_KEY);return s?JSON.parse(s):{questions:{},history:[]};}catch(e){return{questions:{},history:[]};}
+}
+function saveWrongBook(book){
+  try{localStorage.setItem(WRONG_KEY,JSON.stringify(book));}catch(e){}
+}
+function recordWrong(qi,userAns,source){
+  const book=loadWrongBook();
+  if(!book.questions[qi]) book.questions[qi]={wrongAns:[],wrongCount:0,correctInReview:0,lastWrong:null,lastReview:null,mastered:false,source:source||'pp'};
+  const q=book.questions[qi];
+  q.wrongAns.push(userAns);
+  q.wrongCount++;
+  q.lastWrong=Date.now();
+  q.mastered=false;
+  saveWrongBook(book);
+  updateWrongBadge();
+}
+function recordCorrectInReview(qi){
+  const book=loadWrongBook();
+  if(!book.questions[qi])return;
+  book.questions[qi].correctInReview++;
+  book.questions[qi].lastReview=Date.now();
+  if(book.questions[qi].correctInReview>=2) book.questions[qi].mastered=true;
+  saveWrongBook(book);
+  updateWrongBadge();
+}
+function recordCorrectNew(qi){
+  const book=loadWrongBook();
+  if(!book.questions[qi])return;
+  book.questions[qi].correctInReview++;
+  book.questions[qi].lastReview=Date.now();
+  if(book.questions[qi].correctInReview>=2) book.questions[qi].mastered=true;
+  saveWrongBook(book);
+  updateWrongBadge();
+}
+function getWrongCount(){
+  const book=loadWrongBook();
+  return Object.values(book.questions).filter(q=>!q.mastered).length;
+}
+function getMasteredCount(){
+  const book=loadWrongBook();
+  return Object.values(book.questions).filter(q=>q.mastered).length;
+}
+function getTotalWrongEver(){
+  const book=loadWrongBook();
+  return Object.keys(book.questions).length;
+}
+function clearWrongBook(){
+  if(confirm('確定要清除所有錯題記錄？此操作不可撤銷！')){
+    localStorage.removeItem(WRONG_KEY);
+    updateWrongBadge();
+    if(ppState.mode==='review') renderReviewMode();
+  }
+}
+function updateWrongBadge(){
+  const cnt=getWrongCount();
+  let badge=document.getElementById('wrongBadge');
+  if(!badge){
+    const btn=document.getElementById('ppMode_review');
+    if(btn){badge=document.createElement('span');badge.id='wrongBadge';btn.style.position='relative';btn.appendChild(badge);}
+  }
+  if(badge){
+    if(cnt>0){badge.textContent=cnt;badge.style.cssText='position:absolute;top:-6px;right:-6px;background:var(--dn);color:#fff;font-size:10px;font-weight:900;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px;animation:pulse 1.5s infinite;box-shadow:0 2px 6px rgba(225,112,85,.4)';}
+    else{badge.style.display='none';}
+  }
+}
+function getTopicBreakdown(){
+  const book=loadWrongBook();
+  const topics={};
+  Object.entries(book.questions).forEach(([qi,q])=>{
+    if(q.mastered)return;
+    const topic=quizData[parseInt(qi)]?.topic||'Unknown';
+    if(!topics[topic])topics[topic]={wrong:0,mastered:0,total:0};
+    topics[topic].wrong++;
+    topics[topic].total++;
+  });
+  Object.entries(book.questions).forEach(([qi,q])=>{
+    if(!q.mastered)return;
+    const topic=quizData[parseInt(qi)]?.topic||'Unknown';
+    if(!topics[topic])topics[topic]={wrong:0,mastered:0,total:0};
+    topics[topic].mastered++;
+    topics[topic].total++;
+  });
+  return topics;
+}
+// 載入已保存的作答記錄
+function loadSavedAnswers(){
+  const book=loadWrongBook();
+  Object.entries(book.questions).forEach(([qi,q])=>{
+    if(!q.mastered){
+      ppState.answered[qi]={userAns:q.wrongAns[q.wrongAns.length-1],correct:false};
+    }
+  });
+  // 恢復 score（只計算正確的）
+  Object.values(ppState.answered).forEach(v=>{if(v.correct)ppState.score++;});
+}
+
 // Topic × Year Matrix
 const topicList=['Mole','Bonding','Electrolysis','Acids/Bases','Redox','Rate','Equilibrium','Organic','Metals','Energy','Industrial','Separation','Analytical','Atomic','Materials'];
 const yearList=['2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
@@ -3987,6 +4093,7 @@ function filterPP(year){
   if(ppState.mode!=='year')setPPMode('year');
   const area=document.getElementById('ppArea');
   const lang=document.body.getAttribute('data-lang');
+  const book=loadWrongBook();
   const ppQs=quizData.filter(q=>q.year);
   const filtered=year==='all'?ppQs:ppQs.filter(q=>q.year===year);
   
@@ -4009,11 +4116,16 @@ function filterPP(year){
     const opts=lang==='zh'?q.opts_zh:q.opts_en;
     const answered=ppState.answered[qi];
     const userAns=answered?.userAns;
+    const wrongInfo=book.questions[qi];
+    const isMastered=wrongInfo?.mastered;
+    const isWrong=wrongInfo&&!wrongInfo.mastered;
     
     html+=`<div class="quiz-container" id="pp${qi}">
       <div class="quiz-header">
         <span class="tag" style="background:rgba(255,215,0,.15);color:var(--gold);font-weight:700">📅 DSE ${q.year}</span>
         <span class="tag tag-core">${q.topic}</span>
+        ${isMastered?'<span class="tag" style="background:rgba(0,184,148,.15);color:var(--acc)">✅</span>':''}
+        ${isWrong?'<span class="tag" style="background:rgba(225,112,85,.15);color:var(--dn)">🔄 錯'+wrongInfo.wrongCount+'次</span>':''}
       </div>
       <div class="quiz-q"><span class="q-num">PP${i+1}.</span>${qText}</div>
       <div class="quiz-opts" id="ppopts${qi}">
@@ -4034,6 +4146,7 @@ function filterPPByTopic(topic){
   if(ppState.mode!=='topic')setPPMode('topic');
   const area=document.getElementById('ppArea');
   const lang=document.body.getAttribute('data-lang');
+  const book=loadWrongBook();
   const filtered=topic==='all'?quizData:quizData.filter(q=>q.topic===topic);
   
   let html=`<div style="margin:16px 0 12px;padding:12px 16px;background:linear-gradient(135deg,rgba(108,92,231,.15),rgba(162,155,254,.1));border-radius:12px;border:1px solid rgba(108,92,231,.3)">
@@ -4047,11 +4160,16 @@ function filterPPByTopic(topic){
     const opts=lang==='zh'?q.opts_zh:q.opts_en;
     const answered=ppState.answered[qi];
     const userAns=answered?.userAns;
+    const wrongInfo=book.questions[qi];
+    const isMastered=wrongInfo?.mastered;
+    const isWrong=wrongInfo&&!wrongInfo.mastered;
     
     html+=`<div class="quiz-container" id="pp${qi}">
       <div class="quiz-header">
         ${q.year?`<span class="tag" style="background:rgba(255,215,0,.15);color:var(--gold);font-weight:700">📅 DSE ${q.year}</span>`:''}
         <span class="tag tag-core">${q.topic}</span>
+        ${isMastered?'<span class="tag" style="background:rgba(0,184,148,.15);color:var(--acc)">✅</span>':''}
+        ${isWrong?'<span class="tag" style="background:rgba(225,112,85,.15);color:var(--dn)">🔄 錯'+wrongInfo.wrongCount+'次</span>':''}
       </div>
       <div class="quiz-q"><span class="q-num">T${i+1}.</span>${qText}</div>
       <div class="quiz-opts">
@@ -4067,38 +4185,109 @@ function filterPPByTopic(topic){
 function renderReviewMode(){
   const area=document.getElementById('ppArea');
   const lang=document.body.getAttribute('data-lang');
-  const wrongQs=Object.entries(ppState.answered).filter(([k,v])=>!v.correct).map(([k])=>parseInt(k));
+  const book=loadWrongBook();
   
-  if(wrongQs.length===0){
+  // 從 localStorage 載入歷史錯題（合併 session 中的）
+  const allWrongQs=Object.entries(book.questions).filter(([qi,q])=>!q.mastered).map(([qi])=>parseInt(qi));
+  const masteredQs=Object.entries(book.questions).filter(([qi,q])=>q.mastered).map(([qi])=>parseInt(qi));
+  
+  // 同步到 ppState（確保新答錯的也在裡面）
+  Object.entries(ppState.answered).forEach(([qi,v])=>{
+    if(!v.correct && !allWrongQs.includes(parseInt(qi))){
+      allWrongQs.push(parseInt(qi));
+    }
+  });
+  
+  // 按課題統計
+  
+  if(allWrongQs.length===0 && masteredQs.length===0){
     area.innerHTML=`<div class="callout callout-tip" style="text-align:center;padding:40px">
       <div style="font-size:48px;margin-bottom:12px">🎉</div>
       <h3 style="color:var(--acc)"><span class="zh-only">太棒了！沒有錯題！</span><span class="en-only">Great! No mistakes!</span></h3>
-      <p style="color:var(--dim)"><span class="zh-only">繼續做更多題目，錯題會自動出現在這裡。</span><span class="en-only">Keep practising — wrong answers will appear here automatically.</span></p>
+      <p style="color:var(--dim)"><span class="zh-only">繼續做更多題目，答錯的題目會自動記錄在這裡，下次回來也不會丟失。</span><span class="en-only">Keep practising — wrong answers are saved automatically and persist across sessions.</span></p>
     </div>`;
     return;
   }
   
-  let html=`<div style="margin:12px 0;padding:10px 16px;background:rgba(225,112,85,.1);border-radius:10px">
-    <span class="zh-only">找到 ${wrongQs.length} 條錯題，重做直到全部正確！</span>
-    <span class="en-only">${wrongQs.length} wrong answers found. Retry until all correct!</span>
-  </div>`;
+  let html='';
   
-  wrongQs.forEach((qi,i)=>{
-    const q=quizData[qi];
-    const qText=lang==='zh'?q.q_zh:q.q_en;
-    const opts=lang==='zh'?q.opts_zh:q.opts_en;
-    html+=`<div class="quiz-container" id="ppr${qi}">
-      <div class="quiz-header">
-        <span class="tag" style="background:rgba(225,112,85,.15);color:var(--dn)">🔄 <span class="zh-only">錯題</span><span class="en-only">Wrong</span></span>
-        ${q.year?`<span class="tag" style="background:rgba(255,215,0,.15);color:var(--gold)">📅 DSE ${q.year}</span>`:''}
-        <span class="tag tag-core">${q.topic}</span>
+  // ===== 錯題統計面板 =====
+  html+=`<div style="margin:0 0 16px;padding:16px 20px;background:linear-gradient(135deg,rgba(225,112,85,.08),rgba(253,203,110,.05));border-radius:14px;border:1px solid rgba(225,112,85,.2)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3 style="font-size:16px;font-weight:800;color:var(--dn)">📊 <span class="zh-only">錯題統計</span><span class="en-only">Mistake Stats</span></h3>
+      <button onclick="clearWrongBook()" style="font-size:11px;padding:4px 10px;border:1px solid var(--dim);border-radius:6px;background:transparent;color:var(--dim);cursor:pointer"><span class="zh-only">清除記錄</span><span class="en-only">Clear Records</span></button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">
+      <div style="text-align:center;padding:10px;background:rgba(225,112,85,.12);border-radius:10px">
+        <div style="font-size:24px;font-weight:900;color:var(--dn)">${allWrongQs.length}</div>
+        <div style="font-size:11px;color:var(--dim)"><span class="zh-only">待複習</span><span class="en-only">To Review</span></div>
       </div>
-      <div class="quiz-q"><span class="q-num">R${i+1}.</span>${qText}</div>
-      <div class="quiz-opts">
-        ${opts.map((o,j)=>`<div class="quiz-opt" onclick="selectReviewPP(${qi},${j})" id="ppropt${qi}_${j}"><div class="opt-letter">${'ABCD'[j]}</div><span>${o}</span></div>`).join('')}
+      <div style="text-align:center;padding:10px;background:rgba(0,184,148,.12);border-radius:10px">
+        <div style="font-size:24px;font-weight:900;color:var(--acc)">${masteredQs.length}</div>
+        <div style="font-size:11px;color:var(--dim)"><span class="zh-only">已掌握 ✅</span><span class="en-only">Mastered ✅</span></div>
+      </div>
+      <div style="text-align:center;padding:10px;background:rgba(255,215,0,.12);border-radius:10px">
+        <div style="font-size:24px;font-weight:900;color:var(--gold)">${getTotalWrongEver()}</div>
+        <div style="font-size:11px;color:var(--dim)"><span class="zh-only">累計錯題</span><span class="en-only">Total Wrong</span></div>
       </div>
     </div>`;
-  });
+  
+  // 按課題弱點分析
+  const weakTopics=Object.entries(getTopicBreakdown()).sort((a,b)=>b[1].wrong-a[1].wrong);
+  if(weakTopics.length>0){
+    html+=`<div style="margin-top:8px"><div style="font-size:12px;font-weight:700;color:var(--txt);margin-bottom:6px"><span class="zh-only">🔍 弱點分析</span><span class="en-only">🔍 Weakness Analysis</span></div>`;
+    weakTopics.forEach(([topic,d])=>{
+      const pct=d.total>0?Math.round(d.wrong/d.total*100):0;
+      html+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <span style="font-size:11px;color:var(--txt);min-width:90px;font-weight:600">${topic}</span>
+        <div style="flex:1;height:8px;background:var(--card2);border-radius:4px;overflow:hidden">
+          <div style="width:${pct}%;height:100%;background:${pct>50?'var(--dn)':'var(--gold)'};border-radius:4px"></div>
+        </div>
+        <span style="font-size:11px;color:var(--dn);font-weight:700">${d.wrong}<span style="color:var(--dim)">/${d.total}</span></span>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+  html+=`</div>`;
+  
+  if(allWrongQs.length===0){
+    html+=`<div class="callout callout-tip" style="text-align:center;padding:30px">
+      <div style="font-size:36px;margin-bottom:8px">🏆</div>
+      <h3 style="color:var(--acc)"><span class="zh-only">所有錯題都已掌握！</span><span class="en-only">All mistakes mastered!</span></h3>
+      <p style="color:var(--dim);font-size:13px"><span class="zh-only">繼續做新題目，保持這個水準 💪</span><span class="en-only">Keep practising new questions! 💪</span></p>
+    </div>`;
+  }else{
+    // 顯示待複習題目
+    html+=`<div style="margin:12px 0;padding:10px 16px;background:rgba(225,112,85,.1);border-radius:10px;display:flex;justify-content:space-between;align-items:center">
+      <span class="zh-only">📝 找到 <strong>${allWrongQs.length}</strong> 條待複習錯題，重做直到掌握！</span>
+      <span class="en-only">📝 <strong>${allWrongQs.length}</strong> questions to review. Retry until mastered!</span>
+      <button onclick="renderReviewMode()" style="font-size:11px;padding:4px 10px;border-radius:6px;background:var(--acc);color:#fff;border:none;cursor:pointer"><span class="zh-only">🔄 再來一輪</span><span class="en-only">🔄 Again</span></button>
+    </div>`;
+    
+    allWrongQs.forEach((qi,i)=>{
+      const q=quizData[qi];
+      if(!q)return;
+      const qText=lang==='zh'?q.q_zh:q.q_en;
+      const opts=lang==='zh'?q.opts_zh:q.opts_en;
+      const wrongInfo=book.questions[qi];
+      const daysSince=wrongInfo&&wrongInfo.lastWrong?Math.floor((Date.now()-wrongInfo.lastWrong)/(1000*60*60*24)):0;
+      const reviewHint=daysSince>=3?'🔴':'🟡';
+      
+      html+=`<div class="quiz-container" id="ppr${qi}">
+        <div class="quiz-header">
+          <span class="tag" style="background:rgba(225,112,85,.15);color:var(--dn)">🔄 <span class="zh-only">錯題</span><span class="en-only">Wrong</span></span>
+          ${q.year?`<span class="tag" style="background:rgba(255,215,0,.15);color:var(--gold)">📅 DSE ${q.year}</span>`:''}
+          <span class="tag tag-core">${q.topic}</span>
+          <span style="font-size:10px;color:var(--dim)">${reviewHint} <span class="zh-only">錯了 ${wrongInfo?.wrongCount||1} 次</span><span class="en-only">Wrong ${wrongInfo?.wrongCount||1}x</span></span>
+        </div>
+        <div class="quiz-q"><span class="q-num">R${i+1}.</span>${qText}</div>
+        <div class="quiz-opts">
+          ${opts.map((o,j)=>`<div class="quiz-opt" onclick="selectReviewPP(${qi},${j})" id="ppropt${qi}_${j}"><div class="opt-letter">${'ABCD'[j]}</div><span>${o}</span></div>`).join('')}
+        </div>
+      </div>`;
+    });
+  }
+  
   area.innerHTML=html;
 }
 
@@ -4113,14 +4302,19 @@ function selectReviewPP(qi,ai){
   const explDiv=document.createElement('div');
   explDiv.className='quiz-expl show';
   explDiv.innerHTML=correct
-    ?`<h4>✅ <span class="zh-only">正確！</span><span class="en-only">Correct!</span></h4>`
-    :`<h4>❌ <span class="zh-only">再試一次！</span><span class="en-only">Try again!</span></h4><p>${lang==='zh'?q.exp_zh:q.exp_en}</p>`;
+    ?`<h4>✅ <span class="zh-only">正確！太棒了！</span><span class="en-only">Correct! Well done!</span></h4>`
+    :`<h4>❌ <span class="zh-only">再接再厲！仔細看解釋。</span><span class="en-only">Keep trying! Read the explanation carefully.</span></h4><p>${lang==='zh'?q.exp_zh:q.exp_en}</p>`;
   document.getElementById(`ppr${qi}`).appendChild(explDiv);
   
+  // 持久化追蹤
   if(correct){
     ppState.answered[qi].correct=true;
     ppState.score++;
+    recordCorrectInReview(qi);
     updatePPScore();
+  }else{
+    // 重做又錯了，更新錯題本
+    recordWrong(qi,ai,'review');
   }
 }
 
@@ -4243,11 +4437,21 @@ function selectMock(qi,ai,correct){
 function selectPP(qi,ai){
   if(ppState.answered[qi])return;
   const q=quizData[qi];
-  ppState.answered[qi]={userAns:ai,correct:ai===q.ans};
-  if(ai===q.ans)ppState.score++;
+  const correct=ai===q.ans;
+  ppState.answered[qi]={userAns:ai,correct:correct};
+  if(correct)ppState.score++;
   
   document.getElementById(`ppopt${qi}_${q.ans}`).classList.add('correct');
-  if(ai!==q.ans)document.getElementById(`ppopt${qi}_${ai}`).classList.add('wrong');
+  if(!correct)document.getElementById(`ppopt${qi}_${ai}`).classList.add('wrong');
+  
+  // 持久化：答錯就記錄到錯題本
+  if(!correct){
+    recordWrong(qi,ai,'pp');
+  }else{
+    // 答對了但之前錯過 → 更新複習次數
+    const book=loadWrongBook();
+    if(book.questions[qi]) recordCorrectNew(qi);
+  }
   
   const lang=document.body.getAttribute('data-lang');
   const explDiv=document.createElement('div');
@@ -4276,11 +4480,13 @@ function toggleConcept(id){
 function init(){
   const savedLang=localStorage.getItem('dse_lang');
   if(savedLang)setLang(savedLang);
+  loadSavedAnswers();
   renderQuiz();
   renderSQ();
   renderFc();
   buildMatrix();
   updateCl();
+  updateWrongBadge();
 }
 
 // Re-render on lang change
