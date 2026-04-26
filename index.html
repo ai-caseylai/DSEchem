@@ -1663,6 +1663,26 @@ footer{text-align:center;padding:30px 16px;color:var(--dim);font-size:11px;borde
       <span class="zh-only">系統會<strong>永久記錄</strong>你答錯的題目，即使關掉瀏覽器也不會丟失！每條錯題追蹤錯誤次數，連續答對 2 次即標記為「已掌握」✅。按課題分析你的弱點，精準突破！</span>
       <span class="en-only">The system <strong>permanently saves</strong> your wrong answers — they persist even after closing the browser! Each mistake is tracked, and after 2 consecutive correct answers it's marked as "mastered" ✅. See your weakness breakdown by topic!</span>
     </div>
+    <!-- 雲端同步控制面板 -->
+    <div id="cloudPanel" style="margin-top:10px;padding:12px 16px;background:linear-gradient(135deg,rgba(9,132,227,.08),rgba(116,185,255,.05));border-radius:10px;border:1px solid rgba(9,132,227,.2)">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:16px">☁️</span>
+          <div>
+            <div style="font-size:13px;font-weight:700"><span class="zh-only">雲端同步</span><span class="en-only">Cloud Sync</span></div>
+            <div style="font-size:11px;color:var(--dim)" id="cloudStatus"><span class="zh-only">跨設備同步錯題記錄</span><span class="en-only">Sync mistakes across devices</span></div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer">
+            <input type="checkbox" id="cloudToggle" onchange="toggleCloudSync(this.checked)" style="accent-color:var(--acc)">
+            <span class="zh-only">啟用</span><span class="en-only">Enable</span>
+          </label>
+          <button onclick="syncToCloud()" style="font-size:11px;padding:4px 10px;border:1px solid var(--acc);border-radius:6px;background:transparent;color:var(--acc);cursor:pointer">📤 <span class="zh-only">上傳</span><span class="en-only">Upload</span></button>
+          <button onclick="syncFromCloud()" style="font-size:11px;padding:4px 10px;border:1px solid var(--pri-l);border-radius:6px;background:transparent;color:var(--pri-l);cursor:pointer">📥 <span class="zh-only">下載</span><span class="en-only">Download</span></button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Similar mode info -->
@@ -3940,6 +3960,21 @@ let ppState={answered:{},score:0,mode:'year',wrongQs:[],mockTimer:null,mockStart
 
 // ===== 持久化錯題追蹤系統 =====
 const WRONG_KEY='dse_wrong_book';
+const API_BASE='https://dse-chem-api.ai-caseylai.workers.dev';
+const SYNC_ENABLED_KEY='dse_cloud_sync';
+
+// 獲取/設定用戶 ID（用 localStorage 持久化一個隨機 ID）
+function getCloudUid(){
+  let uid=localStorage.getItem('dse_uid');
+  if(!uid){uid='u_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);localStorage.setItem('dse_uid',uid);}
+  return uid;
+}
+function isCloudSync(){return localStorage.getItem(SYNC_ENABLED_KEY)==='true';}
+function toggleCloudSync(on){
+  localStorage.setItem(SYNC_ENABLED_KEY,on?'true':'false');
+  if(on) syncToCloud();
+}
+
 function loadWrongBook(){
   try{const s=localStorage.getItem(WRONG_KEY);return s?JSON.parse(s):{questions:{},history:[]};}catch(e){return{questions:{},history:[]};}
 }
@@ -3956,6 +3991,13 @@ function recordWrong(qi,userAns,source){
   q.mastered=false;
   saveWrongBook(book);
   updateWrongBadge();
+  // 雲端同步
+  if(isCloudSync()){
+    fetch(API_BASE+'/api/wrong?uid='+getCloudUid(),{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({question_index:qi,wrong_answer:userAns,source:source||'mc'})
+    }).catch(()=>{});
+  }
 }
 function recordCorrectInReview(qi){
   const book=loadWrongBook();
@@ -3965,6 +4007,13 @@ function recordCorrectInReview(qi){
   if(book.questions[qi].correctInReview>=2) book.questions[qi].mastered=true;
   saveWrongBook(book);
   updateWrongBadge();
+  // 雲端同步
+  if(isCloudSync()){
+    fetch(API_BASE+'/api/wrong/correct?uid='+getCloudUid(),{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({question_index:qi})
+    }).catch(()=>{});
+  }
 }
 function recordCorrectNew(qi){
   const book=loadWrongBook();
@@ -3974,6 +4023,13 @@ function recordCorrectNew(qi){
   if(book.questions[qi].correctInReview>=2) book.questions[qi].mastered=true;
   saveWrongBook(book);
   updateWrongBadge();
+  // 雲端同步
+  if(isCloudSync()){
+    fetch(API_BASE+'/api/wrong/correct?uid='+getCloudUid(),{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({question_index:qi})
+    }).catch(()=>{});
+  }
 }
 function getWrongCount(){
   const book=loadWrongBook();
@@ -3992,6 +4048,10 @@ function clearWrongBook(){
     localStorage.removeItem(WRONG_KEY);
     updateWrongBadge();
     if(ppState.mode==='review') renderReviewMode();
+    // 同步清除雲端
+    if(isCloudSync()){
+      fetch(API_BASE+'/api/wrong?uid='+getCloudUid(),{method:'DELETE'}).catch(()=>{});
+    }
   }
 }
 function updateWrongBadge(){
@@ -4487,6 +4547,9 @@ function init(){
   buildMatrix();
   updateCl();
   updateWrongBadge();
+  updateCloudUI();
+  // 啟動時自動從雲端拉取（背景執行）
+  if(isCloudSync()) syncFromCloud();
 }
 
 // Re-render on lang change
@@ -4500,6 +4563,64 @@ setLang=function(l){
 };
 
 init();
+
+// ===== 雲端同步功能 =====
+function updateCloudUI(){
+  const toggle=document.getElementById('cloudToggle');
+  const status=document.getElementById('cloudStatus');
+  if(!toggle||!status)return;
+  toggle.checked=isCloudSync();
+  if(isCloudSync()){
+    status.innerHTML='<span class="zh-only">✅ 已啟用 · 你的 ID：<code style="background:var(--card2);padding:1px 4px;border-radius:3px;font-size:10px">'+getCloudUid()+'</code></span><span class="en-only">✅ Enabled · Your ID: <code style="background:var(--card2);padding:1px 4px;border-radius:3px;font-size:10px">'+getCloudUid()+'</code></span>';
+  }else{
+    status.innerHTML='<span class="zh-only">跨設備同步錯題記錄</span><span class="en-only">Sync mistakes across devices</span>';
+  }
+}
+
+async function syncToCloud(){
+  if(!isCloudSync())return;
+  const book=loadWrongBook();
+  if(Object.keys(book.questions).length===0)return;
+  try{
+    const res=await fetch(API_BASE+'/api/sync?uid='+getCloudUid(),{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({wrong_book:book})
+    });
+    const data=await res.json();
+    if(data.ok) console.log('☁️ Synced',data.synced,'records to cloud');
+  }catch(e){console.log('☁️ Sync failed:',e);}
+}
+
+async function syncFromCloud(){
+  if(!isCloudSync())return;
+  try{
+    const res=await fetch(API_BASE+'/api/wrong?uid='+getCloudUid());
+    const data=await res.json();
+    if(!data.ok||!data.data)return;
+    const book=loadWrongBook();
+    let merged=0;
+    data.data.forEach(row=>{
+      const qi=String(row.question_index);
+      if(!book.questions[qi]||book.questions[qi].wrongCount<row.wrong_count){
+        book.questions[qi]={
+          wrongAns:[row.wrong_answer],
+          wrongCount:row.wrong_count,
+          correctInReview:row.correct_count,
+          lastWrong:row.last_wrong_at*1000,
+          lastReview:row.last_review_at?row.last_review_at*1000:null,
+          mastered:row.mastered===1,
+          source:row.source
+        };
+        merged++;
+      }
+    });
+    if(merged>0){
+      saveWrongBook(book);
+      updateWrongBadge();
+      console.log('☁️ Merged',merged,'records from cloud');
+    }
+  }catch(e){console.log('☁️ Fetch failed:',e);}
+}
 
 // ===== AI TUTOR (GLM-5.1) =====
 const AI_KEY='bc604bbc774c49528e8615564aa51ea3.f0Hzibmlxdd5bKGZ';
