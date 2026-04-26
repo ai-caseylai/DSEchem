@@ -4683,38 +4683,88 @@ Rules:
 Topics covered: Mole calculations, Chemical bonding, Electrolysis, Chemical equilibrium, Organic chemistry, Rate of reaction, Acids & bases, Redox, Metals, Atomic structure, Periodic table, Industrial chemistry, Energy changes, Separation techniques.`;
 
 async function streamAI(messages, onToken, onDone, onError){
+  const body={model:'glm-5.1',messages:[{role:'system',content:AI_SYS_PROMPT},...messages.slice(-20)],temperature:0.7,max_tokens:2000,stream:true};
   try{
     const res=await fetch(AI_URL,{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+AI_KEY},
-      body:JSON.stringify({model:'glm-5.1',messages:[{role:'system',content:AI_SYS_PROMPT},...messages.slice(-20)],temperature:0.7,max_tokens:2000,stream:true})
+      body:JSON.stringify(body)
     });
-    const reader=res.body.getReader();
-    const decoder=new TextDecoder();
-    let fullText='';
-    let buffer='';
-    while(true){
-      const {done,value}=await reader.read();
-      if(done)break;
-      buffer+=decoder.decode(value,{stream:true});
-      const lines=buffer.split('\n');
-      buffer=lines.pop()||'';
-      for(const line of lines){
-        const trimmed=line.trim();
-        if(!trimmed||!trimmed.startsWith('data:'))continue;
-        const data=trimmed.slice(5).trim();
-        if(data==='[DONE]')break;
-        try{
-          const json=JSON.parse(data);
-          const token=json.choices?.[0]?.delta?.content;
-          if(token){
-            fullText+=token;
-            onToken(fullText);
-          }
-        }catch(e){}
+    
+    // 檢查 content-type，如果不是 stream 就用 JSON 模式
+    const ct=res.headers.get('content-type')||'';
+    if(ct.includes('text/event-stream')||ct.includes('octet-stream')){
+      // 流式模式
+      const reader=res.body.getReader();
+      const decoder=new TextDecoder();
+      let fullText='';
+      let buffer='';
+      while(true){
+        const {done,value}=await reader.read();
+        if(done)break;
+        buffer+=decoder.decode(value,{stream:true});
+        const lines=buffer.split('\n');
+        buffer=lines.pop()||'';
+        for(const line of lines){
+          const trimmed=line.trim();
+          if(!trimmed||!trimmed.startsWith('data:'))continue;
+          const data=trimmed.slice(5).trim();
+          if(data==='[DONE]')break;
+          try{
+            const json=JSON.parse(data);
+            const token=json.choices?.[0]?.delta?.content;
+            if(token){fullText+=token;onToken(fullText);}
+          }catch(e){}
+        }
+      }
+      if(fullText){onDone(fullText);}
+      else{
+        // 流式讀不到內容，fallback 到 JSON
+        await fetchAIJson(messages,onToken,onDone,onError);
+      }
+    }else{
+      // 非 stream response，直接解析 JSON
+      const data=await res.json();
+      const reply=data.choices?.[0]?.message?.content||'';
+      if(reply){
+        // 模擬逐字輸出效果
+        let display='';
+        for(let i=0;i<reply.length;i++){
+          display+=reply[i];
+          onToken(display);
+          if(i%3===0)await new Promise(r=>setTimeout(r,15));
+        }
+        onDone(reply);
+      }else{
+        onError(new Error('Empty response'));
       }
     }
-    onDone(fullText);
+  }catch(e){
+    onError(e);
+  }
+}
+
+// Fallback: 非流式 JSON 請求（帶逐字顯示效果）
+async function fetchAIJson(messages, onToken, onDone, onError){
+  try{
+    const res=await fetch(AI_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+AI_KEY},
+      body:JSON.stringify({model:'glm-5.1',messages:[{role:'system',content:AI_SYS_PROMPT},...messages.slice(-20)],temperature:0.7,max_tokens:2000})
+    });
+    const data=await res.json();
+    const reply=data.choices?.[0]?.message?.content||'';
+    if(reply){
+      let display='';
+      for(let i=0;i<reply.length;i++){
+        display+=reply[i];
+        onToken(display);
+        if(i%3===0)await new Promise(r=>setTimeout(r,15));
+      }
+      onDone(reply);
+    }else{
+      onError(new Error('Empty response'));
+    }
   }catch(e){
     onError(e);
   }
@@ -4797,7 +4847,7 @@ Please answer in this format:
   streamAI(aiModalHistory,
     (text)=>{botEl.innerHTML=formatAI(text);msgs.scrollTop=msgs.scrollHeight;},
     (fullText)=>{aiModalHistory.push({role:'assistant',content:fullText});},
-    ()=>{botEl.innerHTML+='⚠️ 網絡錯誤，請重試';}
+    ()=>{botEl.innerHTML='⚠️ 網絡錯誤，請重試';}
   );
 }
 
@@ -4825,7 +4875,7 @@ function aiModalSend(){
   streamAI(aiModalHistory,
     (text)=>{botEl.innerHTML=formatAI(text);msgs.scrollTop=msgs.scrollHeight;},
     (fullText)=>{aiModalHistory.push({role:'assistant',content:fullText});},
-    ()=>{botEl.innerHTML+='⚠️ 網絡錯誤';}
+    ()=>{botEl.innerHTML='⚠️ 網絡錯誤';}
   );
 }
 
