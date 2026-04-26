@@ -3969,7 +3969,7 @@ function getCloudUid(){
   if(!uid){uid='u_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);localStorage.setItem('dse_uid',uid);}
   return uid;
 }
-function isCloudSync(){return localStorage.getItem(SYNC_ENABLED_KEY)==='true';}
+function isCloudSync(){const v=localStorage.getItem(SYNC_ENABLED_KEY);return v===null||v==='true';}
 function toggleCloudSync(on){
   localStorage.setItem(SYNC_ENABLED_KEY,on?'true':'false');
   if(on) syncToCloud();
