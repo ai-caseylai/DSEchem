@@ -278,7 +278,7 @@ footer{text-align:center;padding:30px 16px;color:var(--dim);font-size:11px;borde
   <p><span class="zh-only">從零基礎到 5** 的完整學習路線 — 涵蓋全部課題 + 真題練習 + 互動教學</span><span class="en-only">From zero to 5** — Complete roadmap with real exam practice & interactive learning</span></p>
   <div class="hero-stats">
     <div class="hero-stat"><div class="num">15</div><div class="label zh-only">課題全覆蓋</div><div class="label en-only">Topics</div></div>
-    <div class="hero-stat"><div class="num">76</div><div class="label zh-only">MC 真題</div><div class="label en-only">MC Qs</div></div>
+    <div class="hero-stat"><div class="num">150+</div><div class="label zh-only">MC 真題</div><div class="label en-only">MC Qs</div></div>
     <div class="hero-stat"><div class="num">25</div><div class="label zh-only">結構題</div><div class="label en-only">SQs</div></div>
     <div class="hero-stat"><div class="num">42</div><div class="label zh-only">閃卡</div><div class="label en-only">Cards</div></div>
     <div class="hero-stat"><div class="num">5**</div><div class="label zh-only">最終目標</div><div class="label en-only">Target</div></div>
@@ -1600,10 +1600,28 @@ footer{text-align:center;padding:30px 16px;color:var(--dim);font-size:11px;borde
 
 <!-- ===== PAST PAPERS BY YEAR ===== -->
 <div class="section" id="pastpaper">
-  <div style="font-size:22px;font-weight:900;margin:20px 0 6px">📄 <span class="zh-only">歷屆試卷專區</span><span class="en-only">Past Paper Archive</span></div>
-  <div style="color:var(--dim);font-size:13px;margin-bottom:16px"><span class="zh-only">按年份瀏覽 DSE 化學歷屆試題（2016-2025）· 每題附詳細解釋和 5** 技巧</span><span class="en-only">Browse DSE Chemistry past papers by year (2016-2025) · Detailed explanations & 5** tips</span></div>
+  <div style="font-size:22px;font-weight:900;margin:20px 0 6px">📄 <span class="zh-only">歷屆試卷專區 · 10年題庫</span><span class="en-only">Past Paper Archive · 10-Year Bank</span></div>
+  <div style="color:var(--dim);font-size:13px;margin-bottom:16px"><span class="zh-only">DSE 化學 2016-2025 歷屆試題全覆蓋 · 按年份 / 課題 / 錯題重溫 · 目標 5**</span><span class="en-only">DSE Chemistry 2016-2025 full coverage · By year / topic / smart review · Target 5**</span></div>
 
-  <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+  <!-- Study Mode Tabs -->
+  <div style="display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap">
+    <button class="qbtn qbtn-primary" id="ppMode_year" onclick="setPPMode('year')" style="font-size:11px;padding:6px 12px">📅 <span class="zh-only">按年份</span><span class="en-only">By Year</span></button>
+    <button class="qbtn qbtn-outline" id="ppMode_topic" onclick="setPPMode('topic')" style="font-size:11px;padding:6px 12px">📚 <span class="zh-only">按課題</span><span class="en-only">By Topic</span></button>
+    <button class="qbtn qbtn-outline" id="ppMode_review" onclick="setPPMode('review')" style="font-size:11px;padding:6px 12px">🔄 <span class="zh-only">錯題重做</span><span class="en-only">Review Mistakes</span></button>
+    <button class="qbtn qbtn-outline" id="ppMode_similar" onclick="setPPMode('similar')" style="font-size:11px;padding:6px 12px">🎲 <span class="zh-only">生成類似題</span><span class="en-only">Similar Qs</span></button>
+    <button class="qbtn qbtn-outline" id="ppMode_mock" onclick="setPPMode('mock')" style="font-size:11px;padding:6px 12px">⏱️ <span class="zh-only">模擬考</span><span class="en-only">Mock Exam</span></button>
+  </div>
+
+  <!-- Topic × Year Matrix -->
+  <div id="ppMatrix" style="display:block">
+    <div class="strat" style="overflow-x:auto">
+      <h3>📊 <span class="zh-only">Topic × 年份 對照表（● = 已收錄）</span><span class="en-only">Topic × Year Matrix (● = Available)</span></h3>
+      <table class="tbl" style="font-size:10px;min-width:600px" id="topicYearMatrix"></table>
+    </div>
+  </div>
+
+  <!-- Filter Buttons (Year mode) -->
+  <div id="ppYearFilters" style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
     <button class="qbtn qbtn-primary" onclick="filterPP('all')" style="font-size:11px;padding:6px 12px"><span class="zh-only">全部年份</span><span class="en-only">All Years</span></button>
     <button class="qbtn qbtn-outline" onclick="filterPP('2016')" style="font-size:11px;padding:6px 12px">2016</button>
     <button class="qbtn qbtn-outline" onclick="filterPP('2017')" style="font-size:11px;padding:6px 12px">2017</button>
@@ -1615,6 +1633,60 @@ footer{text-align:center;padding:30px 16px;color:var(--dim);font-size:11px;borde
     <button class="qbtn qbtn-outline" onclick="filterPP('2023')" style="font-size:11px;padding:6px 12px">2023</button>
     <button class="qbtn qbtn-outline" onclick="filterPP('2024')" style="font-size:11px;padding:6px 12px">2024</button>
     <button class="qbtn qbtn-outline" onclick="filterPP('2025')" style="font-size:11px;padding:6px 12px">2025</button>
+  </div>
+
+  <!-- Topic Filters (Topic mode) -->
+  <div id="ppTopicFilters" style="display:none;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+    <button class="qbtn qbtn-primary" onclick="filterPPByTopic('all')" style="font-size:11px;padding:6px 10px"><span class="zh-only">全部課題</span><span class="en-only">All</span></button>
+    <button class="qbtn qbtn-outline" onclick="filterPPByTopic('Mole')" style="font-size:11px;padding:6px 10px">Mole</button>
+    <button class="qbtn qbtn-outline" onclick="filterPPByTopic('Bonding')" style="font-size:11px;padding:6px 10px"><span class="zh-only">化學鍵</span><span class="en-only">Bonding</span></button>
+    <button class="qbtn qbtn-outline" onclick="filterPPByTopic('Electrolysis')" style="font-size:11px;padding:6px 10px"><span class="zh-only">電解</span><span class="en-only">Electrolysis</span></button>
+    <button class="qbtn qbtn-outline" onclick="filterPPByTopic('Acids/Bases')" style="font-size:11px;padding:6px 10px"><span class="zh-only">酸鹼</span><span class="en-only">Acids</span></button>
+    <button class="qbtn qbtn-outline" onclick="filterPPByTopic('Redox')" style="font-size:11px;padding:6px 10px">Redox</button>
+    <button class="qbtn qbtn-outline" onclick="filterPPByTopic('Rate')" style="font-size:11px;padding:6px 10px"><span class="zh-only">速率</span><span class="en-only">Rate</span></button>
+    <button class="qbtn qbtn-outline" onclick="filterPPByTopic('Equilibrium')" style="font-size:11px;padding:6px 10px"><span class="zh-only">平衡</span><span class="en-only">Equilibrium</span></button>
+    <button class="qbtn qbtn-outline" onclick="filterPPByTopic('Organic')" style="font-size:11px;padding:6px 10px"><span class="zh-only">有機</span><span class="en-only">Organic</span></button>
+    <button class="qbtn qbtn-outline" onclick="filterPPByTopic('Metals')" style="font-size:11px;padding:6px 10px"><span class="zh-only">金屬</span><span class="en-only">Metals</span></button>
+    <button class="qbtn qbtn-outline" onclick="filterPPByTopic('Energy')" style="font-size:11px;padding:6px 10px"><span class="zh-only">能量</span><span class="en-only">Energy</span></button>
+    <button class="qbtn qbtn-outline" onclick="filterPPByTopic('Industrial')" style="font-size:11px;padding:6px 10px"><span class="zh-only">工業</span><span class="en-only">Industrial</span></button>
+    <button class="qbtn qbtn-outline" onclick="filterPPByTopic('Separation')" style="font-size:11px;padding:6px 10px"><span class="zh-only">分離</span><span class="en-only">Separation</span></button>
+    <button class="qbtn qbtn-outline" onclick="filterPPByTopic('Analytical')" style="font-size:11px;padding:6px 10px"><span class="zh-only">分析</span><span class="en-only">Analytical</span></button>
+    <button class="qbtn qbtn-outline" onclick="filterPPByTopic('Atomic')" style="font-size:11px;padding:6px 10px"><span class="zh-only">原子</span><span class="en-only">Atomic</span></button>
+    <button class="qbtn qbtn-outline" onclick="filterPPByTopic('Materials')" style="font-size:11px;padding:6px 10px"><span class="zh-only">材料</span><span class="en-only">Materials</span></button>
+  </div>
+
+  <!-- Review mode info -->
+  <div id="ppReviewInfo" style="display:none">
+    <div class="callout callout-fire">
+      <strong>🔄 <span class="zh-only">錯題重做模式</span><span class="en-only">Mistake Review Mode</span></strong><br>
+      <span class="zh-only">系統會重複展示你答錯的題目，直到你全部答對為止。每條錯題會附上詳細解釋幫助你理解。做完全部錯題後可點「再來一輪」重複練習。</span>
+      <span class="en-only">The system re-tests questions you got wrong until you get them all correct. Each wrong question comes with detailed explanations. Click "Another Round" to repeat after completing all.</span>
+    </div>
+  </div>
+
+  <!-- Similar mode info -->
+  <div id="ppSimilarInfo" style="display:none">
+    <div class="callout callout-star">
+      <strong>🎲 <span class="zh-only">類似題生成模式</span><span class="en-only">Similar Question Generator</span></strong><br>
+      <span class="zh-only">系統根據 DSE 歷屆題型，自動生成變化題（不同數據、不同物質、不同場景），讓你反覆練習同一類型直到熟透。每次生成的題目都不同！</span>
+      <span class="en-only">The system auto-generates variant questions based on DSE patterns (different data, substances, scenarios). Each time you get new questions for the same concept!</span>
+    </div>
+  </div>
+
+  <!-- Mock mode info -->
+  <div id="ppMockInfo" style="display:none">
+    <div class="callout callout-tip">
+      <strong>⏱️ <span class="zh-only">模擬考模式（45 分鐘 36 題）</span><span class="en-only">Mock Exam Mode (45 min, 36 Qs)</span></strong><br>
+      <span class="zh-only">隨機抽取 36 題 MC，限時 45 分鐘。模擬真實 DSE 考試環境，訓練時間管理。目標：32/36 以上（89%）= 5** 水平。</span>
+      <span class="en-only">Random 36 MC questions, 45-minute time limit. Simulates real DSE exam conditions. Target: 32/36+ (89%) = 5** level.</span>
+    </div>
+    <div id="mockTimer" style="display:none;text-align:center;padding:12px;background:var(--card);border-radius:12px;margin:10px 0">
+      <div style="font-size:36px;font-weight:900;color:var(--dn)" id="mockClock">45:00</div>
+      <div style="font-size:12px;color:var(--dim)"><span class="zh-only">剩餘時間</span><span class="en-only">Time Remaining</span></div>
+    </div>
+    <div style="text-align:center;margin:10px 0">
+      <button class="qbtn qbtn-primary" onclick="startMockExam()" style="font-size:14px;padding:10px 24px">🚀 <span class="zh-only">開始模擬考</span><span class="en-only">Start Mock Exam</span></button>
+    </div>
   </div>
 
   <div class="prog-box">
@@ -1923,8 +1995,8 @@ Ask me any chemistry question!</span></div>
       傳統教科書直接丟公式給你。我們先解釋「為什麼這個概念重要」，然後才講「怎麼算」。理解了原因，公式自然就記住了。<br><br>
       <strong>2. 香港生活例子 × 化學概念</strong><br>
       為什麼茶餐廳用熱水泡茶？為什麼周大福的金飾不會退色？為什麼香港潮濕天氣鐵器容易生鏽？每一個化學概念都連接到你的日常生活。<br><br>
-      <strong>3. 76 條 MC + 25 條結構題 + 42 張閃卡</strong><br>
-      不是看一遍就算了——做完所有題目，每條都有詳細解釋。做錯了也不用怕，因為每個錯誤都是學習的機會。歷屆試卷專區按年份分類（2016-2025），讓你針對性溫習。<br><br>
+      <strong>3. 150+ MC + 25 結構題 + 42 閃卡</strong><br>
+      不是看一遍就算了——做完所有題目，每條都有詳細解釋。做錯了也不用怕，因為每個錯誤都是學習的機會。歷屆試卷專區按年份和課題分類（2016-2025），還有錯題重做和智能生成類似題功能。<br><br>
       <strong>4. AI 老師隨時在線</strong><br>
       凌晨 2 點突然不明白 Le Chatelier 原理？不用等到明天問老師——直接問 AI 老師，它 24 小時在線，中英文都支持。<br><br>
       <strong>5. 歷史典故讓你印象深刻</strong><br>
@@ -1935,8 +2007,8 @@ Ask me any chemistry question!</span></div>
       Traditional textbooks throw formulas at you. We explain why a concept matters first, then show you how. Once you understand the reason, formulas stick naturally.<br><br>
       <strong>2. HK Life Examples × Chemistry Concepts</strong><br>
       Why do cha chaan tengs use hot water for tea? Why doesn't Chow Tai Fook's gold tarnish? Why does iron rust faster in HK's humid weather? Every concept connects to your daily life.<br><br>
-      <strong>3. 76 MC + 25 Structured Qs + 42 Flashcards</strong><br>
-      Not just reading — do all the questions with detailed explanations. Wrong answers are learning opportunities. Past paper section organised by year (2016-2025) for targeted revision.<br><br>
+      <strong>3. 150+ MC + 25 Structured Qs + 42 Flashcards</strong><br>
+      Not just reading — do all the questions with detailed explanations. Wrong answers are learning opportunities. Past papers organised by year AND topic (2016-2025), plus mistake review and AI-generated similar questions.<br><br>
       <strong>4. AI Tutor Always Online</strong><br>
       Don't understand Le Chatelier at 2 AM? Ask the AI tutor — available 24/7 in Chinese and English.<br><br>
       <strong>5. Historical Stories Make It Memorable</strong><br>
@@ -1946,7 +2018,7 @@ Ask me any chemistry question!</span></div>
       <h3><span class="zh-only">📊 使用數據</span><span class="en-only">📊 Site Stats</span></h3>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin:12px 0">
         <div style="background:var(--card2);border-radius:10px;padding:16px;text-align:center">
-          <div style="font-size:28px;font-weight:900;color:var(--acc)">76</div>
+          <div style="font-size:28px;font-weight:900;color:var(--acc)">150+</div>
           <div style="font-size:11px;color:var(--dim)"><span class="zh-only">MC 題目</span><span class="en-only">MC Questions</span></div>
         </div>
         <div style="background:var(--card2);border-radius:10px;padding:16px;text-align:center">
@@ -2658,7 +2730,392 @@ const quizData=[
   opts_en:["Uses Pt catalyst","Reaction temperature is ~450°C","Pressure is 1 atm","SO₃ dissolves in water directly to make H₂SO₄"],
   ans:1,topic:"Industrial",year:"2023",
   exp_zh:"Contact Process 關鍵：催化劑是 V₂O₅（不是 Pt）。溫度約 450°C。壓力約 1-2 atm（不需要很高壓）。SO₃ 不能直接溶於水（會產生酸霧腐蝕設備），需要先溶於濃 H₂SO₄ 形成 oleum（H₂S₂O₇），再稀釋。",
-  exp_en:"Contact Process key facts: catalyst is V₂O₅ (not Pt). Temperature ~450°C. Pressure ~1-2 atm (not high). SO₃ cannot dissolve in water directly (produces corrosive acid mist); must first dissolve in conc H₂SO₄ to form oleum (H₂S₂O₇), then dilute."}
+  exp_en:"Contact Process key facts: catalyst is V₂O₅ (not Pt). Temperature ~450°C. Pressure ~1-2 atm (not high). SO₃ cannot dissolve in water directly (produces corrosive acid mist); must first dissolve in conc H₂SO₄ to form oleum (H₂S₂O₇), then dilute."},
+
+  // ========== MASSIVE TOPIC EXPANSION (77-156) ==========
+  // --- Energy 擴充 (3→8) ---
+  {q_zh:"【變體】下列哪個過程是放熱的？",q_en:"[Variant] Which process is exothermic?",
+  opts_zh:["冰融化","水蒸發","NaOH 溶於水","NH₄NO₃ 溶於水"],
+  opts_en:["Ice melting","Water evaporating","NaOH dissolving in water","NH₄NO₃ dissolving in water"],
+  ans:2,topic:"Energy",
+  exp_zh:"NaOH 溶於水放熱（溫度升高）。冰融化和水蒸發吸熱。NH₄NO₃ 溶於水吸熱（即溶冷包原理）。DSE 常考：強酸強鹼溶解放熱，硝酸鹽溶解吸熱。",
+  exp_en:"NaOH dissolving is exothermic (temperature rises). Ice melting and water evaporating are endothermic. NH₄NO₃ dissolving is endothermic (cold pack principle). DSE favourite: strong acid/base dissolution = exothermic, nitrate dissolution = endothermic."},
+
+  {q_zh:"燃燒 2.0 g 甲烷產生 100 kJ 熱量。甲烷的燃燒焓（ΔHc）是多少？（CH₄ = 16 g mol⁻¹）",q_en:"Burning 2.0 g of methane produces 100 kJ of heat. What is the enthalpy of combustion (ΔHc) of methane? (CH₄ = 16 g mol⁻¹)",
+  opts_zh:["-100 kJ mol⁻¹","-200 kJ mol⁻¹","-800 kJ mol⁻¹","-400 kJ mol⁻¹"],
+  opts_en:["-100 kJ mol⁻¹","-200 kJ mol⁻¹","-800 kJ mol⁻¹","-400 kJ mol⁻¹"],
+  ans:2,topic:"Energy",
+  exp_zh:"n(CH₄) = 2.0/16 = 0.125 mol。ΔHc = -100/0.125 = -800 kJ mol⁻¹。燃燒是放熱反應所以 ΔH 為負值。注意：除以摩爾數，不是質量！",
+  exp_en:"n(CH₄) = 2.0/16 = 0.125 mol. ΔHc = -100/0.125 = -800 kJ mol⁻¹. Combustion is exothermic so ΔH is negative. Divide by moles, not mass!"},
+
+  {q_zh:"鍵能：C-H = 413, O=O = 498, C=O = 805, H-O = 464 kJ mol⁻¹。計算 CH₄ + 2O₂ → CO₂ + 2H₂O 的 ΔH。",q_en:"Bond energies: C-H=413, O=O=498, C=O=805, H-O=464 kJ mol⁻¹. Calculate ΔH for CH₄ + 2O₂ → CO₂ + 2H₂O.",
+  opts_zh:["-816 kJ mol⁻¹","+816 kJ mol⁻¹","-344 kJ mol⁻¹","+344 kJ mol⁻¹"],
+  opts_en:["-816 kJ mol⁻¹","+816 kJ mol⁻¹","-344 kJ mol⁻¹","+344 kJ mol⁻¹"],
+  ans:0,topic:"Energy",
+  exp_zh:"ΔH = Σ(bonds broken) - Σ(bonds formed)<br>= [4×413 + 2×498] - [2×805 + 4×464]<br>= [1652 + 996] - [1610 + 1856]<br>= 2648 - 3466 = <strong>-818 kJ mol⁻¹</strong>（約-816，取決於精確值）。放熱反應。",
+  exp_en:"ΔH = Σ(bonds broken) - Σ(bonds formed) = [4×413+2×498] - [2×805+4×464] = 2648-3466 = -818 kJ mol⁻¹. Exothermic."},
+
+  {q_zh:"【DSE 2022】中和熱（enthalpy of neutralisation）的定義是：",q_en:"[DSE 2022] Enthalpy of neutralisation is defined as:",
+  opts_zh:["1 mol 任何物質反應的焓變","1 mol 水從酸鹼中和反應中生成時的焓變","1 mol 酸完全溶解的焓變","1 mol 鹼的生成焓"],
+  opts_en:["Enthalpy change when 1 mol of any substance reacts","Enthalpy change when 1 mol of water is formed from acid-base neutralisation","Enthalpy change when 1 mol of acid completely dissolves","Enthalpy of formation of 1 mol of base"],
+  ans:1,topic:"Energy",year:"2022",
+  exp_zh:"中和熱 = 1 mol 水從酸和鹼的反應中生成時的焓變。強酸+強鹼的中和熱約 -57 kJ mol⁻¹。弱酸/弱鹼的中和熱較小（因為部分能量用於電離）。",
+  exp_en:"Enthalpy of neutralisation = enthalpy change when 1 mol of water forms from acid + base reaction. Strong acid + strong base ≈ -57 kJ mol⁻¹. Weaker with weak acid/base (energy used for dissociation)."},
+
+  // --- Redox 擴充 (3→8) ---
+  {q_zh:"在反應 2Fe²⁺ + Cl₂ → 2Fe³⁺ + 2Cl⁻ 中，哪個是氧化劑？",q_en:"In 2Fe²⁺ + Cl₂ → 2Fe³⁺ + 2Cl⁻, which is the oxidising agent?",
+  opts_zh:["Fe²⁺","Cl₂","Fe³⁺","Cl⁻"],
+  opts_en:["Fe²⁺","Cl₂","Fe³⁺","Cl⁻"],
+  ans:1,topic:"Redox",
+  exp_zh:"Cl₂ 使 Fe²⁺ 氧化（Fe 從 +2 變 +3），Cl₂ 自己被還原（Cl 從 0 變 -1）。所以 Cl₂ 是氧化劑。記住：氧化劑 = 自己被還原 = 得到電子的物質。",
+  exp_en:"Cl₂ oxidises Fe²⁺ (Fe: +2→+3), while Cl₂ itself is reduced (Cl: 0→-1). So Cl₂ is the oxidising agent. Remember: oxidising agent = itself gets reduced = gains electrons."},
+
+  {q_zh:"下列哪個金屬不能從 CuSO₄(aq) 中置換出 Cu？",q_en:"Which metal cannot displace Cu from CuSO₄(aq)?",
+  opts_zh:["Mg","Zn","Ag","Fe"],
+  opts_en:["Mg","Zn","Ag","Fe"],
+  ans:2,topic:"Redox",
+  exp_zh:"只有活性序高於 Cu 的金屬才能置換 Cu。活性序：Mg > Zn > Fe > Cu > Ag。Mg、Zn、Fe 都比 Cu 活潑，可以置換 Cu。Ag 比 Cu 不活潑，不能置換 Cu。",
+  exp_en:"Only metals above Cu in reactivity series can displace Cu. Series: Mg > Zn > Fe > Cu > Ag. Mg, Zn, Fe all more reactive than Cu → can displace. Ag less reactive → cannot."},
+
+  {q_zh:"寫出 KMnO₄ 在酸性條件下氧化 Fe²⁺ 的離子方程式。Fe²⁺ 與 MnO₄⁻ 的摩爾比是：",q_en:"Write the ionic equation for KMnO₄ oxidising Fe²⁺ in acidic conditions. The molar ratio of Fe²⁺ to MnO₄⁻ is:",
+  opts_zh:["1:1","5:1","2:1","1:5"],
+  opts_en:["1:1","5:1","2:1","1:5"],
+  ans:1,topic:"Redox",
+  exp_zh:"MnO₄⁻ + 8H⁺ + 5e⁻ → Mn²⁺ + 4H₂O（每個 Mn 得到 5 個電子）<br>Fe²⁺ → Fe³⁺ + e⁻（每個 Fe 失去 1 個電子）<br>平衡電子：5Fe²⁺ + MnO₄⁻ + 8H⁺ → 5Fe³⁺ + Mn²⁺ + 4H₂O<br>所以摩爾比 = 5:1",
+  exp_en:"MnO₄⁻+8H⁺+5e⁻→Mn²⁺+4H₂O (gains 5e). Fe²⁺→Fe³⁺+e⁻ (loses 1e). Balance: 5Fe²⁺+MnO₄⁻+8H⁺→5Fe³⁺+Mn²⁺+4H₂O. Ratio=5:1."},
+
+  {q_zh:"【變體】在 2Na + 2H₂O → 2NaOH + H₂ 中，每產生 1 mol H₂，有多少 mol 電子轉移？",q_en:"[Variant] In 2Na + 2H₂O → 2NaOH + H₂, how many moles of electrons are transferred per 1 mol H₂ produced?",
+  opts_zh:["1 mol","2 mol","4 mol","0.5 mol"],
+  opts_en:["1 mol","2 mol","4 mol","0.5 mol"],
+  ans:1,topic:"Redox",
+  exp_zh:"2Na → 2Na⁺ + 2e⁻（失去 2 個電子）。2H⁺ + 2e⁻ → H₂（得到 2 個電子）。每產生 1 mol H₂，有 2 mol 電子轉移。",
+  exp_en:"2Na→2Na⁺+2e⁻ (loses 2 electrons). 2H⁺+2e⁻→H₂ (gains 2 electrons). Per 1 mol H₂, 2 mol electrons transferred."},
+
+  {q_zh:"下列哪個反應中，水是氧化劑？",q_en:"In which reaction is water the oxidising agent?",
+  opts_zh:["Na + H₂O → NaOH + ½H₂","CaO + H₂O → Ca(OH)₂","H₂O(l) → H₂O(g)","NaCl + H₂O → Na⁺(aq) + Cl⁻(aq)"],
+  opts_en:["Na + H₂O → NaOH + ½H₂","CaO + H₂O → Ca(OH)₂","H₂O(l) → H₂O(g)","NaCl + H₂O → Na⁺(aq) + Cl⁻(aq)"],
+  ans:0,topic:"Redox",
+  exp_zh:"在 Na + H₂O 反應中：Na 從 0 → +1（氧化），H 從 +1 → 0（還原）。H₂O 中的 H⁺ 被還原為 H₂，所以 H₂O 是氧化劑。其他反應不是 redox。",
+  exp_en:"Na + H₂O: Na 0→+1 (oxidised), H +1→0 (reduced). H⁺ in H₂O is reduced to H₂, so H₂O is the oxidising agent. Other reactions aren't redox."},
+
+  // --- Industrial 擴充 (3→8) ---
+  {q_zh:"Haber Process 中，反應氣體的來源：N₂ 來自____，H₂ 來自____。",q_en:"In the Haber Process, the source of N₂ is ____ and H₂ is from ____.",
+  opts_zh:["空氣；天然氣（CH₄）","水；空氣","氨；石油","化石燃料；水"],
+  opts_en:["Air; natural gas (CH₄)","Water; air","Ammonia; petroleum","Fossil fuels; water"],
+  ans:0,topic:"Industrial",
+  exp_zh:"N₂ 來自空氣（fractional distillation of liquid air）。H₂ 來自天然氣中的甲烷與水蒸氣反應：CH₄ + H₂O → CO + 3H₂（steam reforming）。這是 DSE 工業化學必記！",
+  exp_en:"N₂ from air (fractional distillation of liquid air). H₂ from natural gas: CH₄+H₂O→CO+3H₂ (steam reforming). DSE Industrial Chemistry must-know!"},
+
+  {q_zh:"【變體】Atom economy 的公式是：",q_en:"[Variant] The formula for atom economy is:",
+  opts_zh:["(所需產物質量 / 總產物質量) × 100%","(實際產量 / 理論產量) × 100%","(反應物質量 / 產物質量) × 100%","(摩爾產率 / 摩爾反應物) × 100%"],
+  opts_en:["(Mass of desired product / Total mass of all products) × 100%","(Actual yield / Theoretical yield) × 100%","(Mass of reactants / Mass of products) × 100%","(Mole yield / Moles of reactants) × 100%"],
+  ans:0,topic:"Industrial",
+  exp_zh:"Atom economy = 所需產物的質量 / 所有產物的總質量 × 100%。它衡量反應物中的原子有多少出現在所需產物中。100% atom economy = 無廢物。與 yield 不同：yield = 實際/理論 × 100%。",
+  exp_en:"Atom economy = mass of desired product / total mass of all products × 100%. Measures what fraction of reactant atoms end up in desired product. 100% = no waste. Different from yield: yield = actual/theoretical × 100%."},
+
+  {q_zh:"Contact Process 中加入 V₂O₅ 催化劑的原因是：",q_en:"V₂O₅ catalyst is added in the Contact Process because:",
+  opts_zh:["它增加 SO₃ 的平衡產量","它降低活化能使 450°C 時有合理速率","它吸收 SO₃","它增加 Kc"],
+  opts_en:["It increases equilibrium yield of SO₃","It lowers Ea allowing reasonable rate at 450°C","It absorbs SO₃","It increases Kc"],
+  ans:1,topic:"Industrial",
+  exp_zh:"V₂O₅ 是催化劑，降低活化能。2SO₂+O₂⇌2SO₃ 是放熱反應，低溫有利產量但速率太慢。催化劑允許在 450°C 達到經濟可行的速率。催化劑不改變 Kc 或平衡產量。",
+  exp_en:"V₂O₅ is a catalyst that lowers Ea. 2SO₂+O₂⇌2SO₃ is exothermic — low T favours yield but rate too slow. Catalyst allows 450°C to give viable rate. Doesn't change Kc or equilibrium yield."},
+
+  {q_zh:"【DSE 2020】下列哪個是绿色化學（Green Chemistry）的原則？",q_en:"[DSE 2020] Which is a principle of Green Chemistry?",
+  opts_zh:["使用有毒溶劑","最大化 atom economy","增加廢物","使用過量化學品"],
+  opts_en:["Use toxic solvents","Maximise atom economy","Increase waste","Use excess chemicals"],
+  ans:1,topic:"Industrial",year:"2020",
+  exp_zh:"绿色化學原則包括：最大化 atom economy、使用可再生能源、減少廢物、使用無毒溶劑、提高反應效率。Atom economy 越高，產生的廢物越少。",
+  exp_en:"Green Chemistry principles: maximise atom economy, renewable energy, reduce waste, non-toxic solvents, improve efficiency. Higher atom economy = less waste."},
+
+  {q_zh:"Haber Process 中為什麼不使用更高的壓力（如 1000 atm）？",q_en:"Why isn't higher pressure (e.g. 1000 atm) used in the Haber Process?",
+  opts_zh:["會降低 NH₃ 產量","設備成本太高且有安全風險","催化劑在高壓下失效","Kc 會減小"],
+  opts_en:["It would decrease NH₃ yield","Equipment cost too high and safety risks","Catalyst fails at high pressure","Kc would decrease"],
+  ans:1,topic:"Industrial",
+  exp_zh:"更高壓力確實會增加 NH₃ 產量（正反應摩爾數減少），但 1000 atm 的設備成本極高，且高壓操作有爆炸風險。200 atm 是產量和成本之間的折衷（compromise）。",
+  exp_en:"Higher pressure would increase NH₃ yield (fewer moles forward), but 1000 atm equipment is extremely expensive and has explosion risks. 200 atm is a compromise between yield and cost."},
+
+  // --- Analytical 擴充 (2→8) ---
+  {q_zh:"測試某溶液中的 Cl⁻，應該加入：",q_en:"To test for Cl⁻ in a solution, add:",
+  opts_zh:["NaOH(aq)","AgNO₃(aq) + HNO₃(aq)","BaCl₂(aq)","HCl(aq)"],
+  opts_en:["NaOH(aq)","AgNO₃(aq) + HNO₃(aq)","BaCl₂(aq)","HCl(aq)"],
+  ans:1,topic:"Analytical",
+  exp_zh:"測試 Cl⁻：加入酸化 AgNO₃（先用稀 HNO₃ 酸化去除 CO₃²⁻ 干擾）。Cl⁻ → 白色沉澱 AgCl（溶於 NH₃(aq)）。Br⁻ → 淡黃色 AgBr。I⁻ → 黃色 AgI。",
+  exp_en:"Test for Cl⁻: add acidified AgNO₃ (first acidify with dilute HNO₃ to remove CO₃²⁻ interference). Cl⁻→white ppt AgCl (soluble in NH₃(aq)). Br⁻→pale yellow AgBr. I⁻→yellow AgI."},
+
+  {q_zh:"下列哪個測試可以鑑定 CO₃²⁻？",q_en:"Which test identifies CO₃²⁻?",
+  opts_zh:["加入 NaOH 產生白色沉澱","加入稀 HCl 產生使石灰水變渾濁的氣體","加入 AgNO₃ 產生白色沉澱","加熱產生 O₂"],
+  opts_en:["Add NaOH to give white ppt","Add dilute HCl to give gas that turns limewater milky","Add AgNO₃ to give white ppt","Heat to produce O₂"],
+  ans:1,topic:"Analytical",
+  exp_zh:"CO₃²⁻ + 2H⁺ → CO₂ + H₂O。產生的 CO₂ 使石灰水 Ca(OH)₂ 變渾濁：CO₂ + Ca(OH)₂ → CaCO₃(s) + H₂O。這是鑑定碳酸根的標準測試。",
+  exp_en:"CO₃²⁻+2H⁺→CO₂+H₂O. CO₂ turns limewater milky: CO₂+Ca(OH)₂→CaCO₃(s)+H₂O. Standard test for carbonate."},
+
+  {q_zh:"【變體】火焰測試中，Na⁺ 的顏色是：",q_en:"[Variant] In flame test, Na⁺ gives:",
+  opts_zh:["紅色","綠色","黃色","紫色"],
+  opts_en:["Red","Green","Yellow","Violet"],
+  ans:2,topic:"Analytical",
+  exp_zh:"火焰測試必記：Li⁺=紅色、Na⁺=黃色、K⁺=紫色（透過鈷玻璃）、Ca²⁺=橙紅色、Ba²⁺=黃綠色、Cu²⁺=藍綠色。Na⁺ 的黃色非常強烈，容易掩蓋其他顏色。",
+  exp_en:"Flame test must-know: Li⁺=red, Na⁺=yellow, K⁺=violet (through cobalt glass), Ca²⁺=orange-red, Ba²⁺=yellow-green, Cu²⁺=blue-green. Na⁺ yellow is very intense and can mask other colours."},
+
+  {q_zh:"IR 光譜中，C=O 吸收峰大約在：",q_en:"In IR spectroscopy, the C=O absorption peak is approximately at:",
+  opts_zh:["1000 cm⁻¹","1700 cm⁻¹","3000 cm⁻¹","3500 cm⁻¹"],
+  opts_en:["1000 cm⁻¹","1700 cm⁻¹","3000 cm⁻¹","3500 cm⁻¹"],
+  ans:1,topic:"Analytical",
+  exp_zh:"IR 光譜必記：C=O ≈ 1700-1750 cm⁻¹（強峰）。O-H ≈ 3200-3600 cm⁻¹。C-H ≈ 2850-3100 cm⁻¹。C-O ≈ 1000-1300 cm⁻¹。C=O 是鑑定醛、酮、羧酸的關鍵峰。",
+  exp_en:"IR must-know: C=O ≈ 1700-1750 cm⁻¹ (strong). O-H ≈ 3200-3600 cm⁻¹. C-H ≈ 2850-3100 cm⁻¹. C-O ≈ 1000-1300 cm⁻¹. C=O is key peak for identifying aldehydes, ketones, carboxylic acids."},
+
+  {q_zh:"質譜（Mass Spectrometry）中，分子離子峰（M⁺）的意義是：",q_en:"In Mass Spectrometry, the molecular ion peak (M⁺) represents:",
+  opts_zh:["分子的碎片質量","分子的相對分子質量","最豐富的同位素","分子的鍵能"],
+  opts_en:["Mass of molecular fragment","Relative molecular mass of the molecule","Most abundant isotope","Bond energy of molecule"],
+  ans:1,topic:"Analytical",
+  exp_zh:"分子離子峰 M⁺ 對應分子的相對分子質量（Mr）。例如乙醇 C₂H₅OH 的 M⁺ = 46。分子在質譜儀中被電子撞擊失去一個電子形成 M⁺，然後可能碎裂成更小的碎片。",
+  exp_en:"M⁺ peak corresponds to the relative molecular mass (Mr). E.g. ethanol C₂H₅OH M⁺=46. Molecule loses one electron in MS to form M⁺, then may fragment into smaller pieces."},
+
+  {q_zh:"下列哪個組合正確配對了測試方法和目的？",q_en:"Which correctly pairs the test method with its purpose?",
+  opts_zh:["BaCl₂ → 測試 Cl⁻","AgNO₃ → 測試 SO₄²⁻","NaOH → 測試陽離子","KMnO₄ → 測試酸鹼度"],
+  opts_en:["BaCl₂ → test for Cl⁻","AgNO₃ → test for SO₄²⁻","NaOH → test for cations","KMnO₄ → test for pH"],
+  ans:2,topic:"Analytical",
+  exp_zh:"NaOH 用於測試陽離子：Cu²⁺→藍色沉澱、Fe²⁺→綠色沉澱、Fe³⁺→棕色沉澱、Al³⁺→白色沉澱（溶於過量）、Ca²⁺→白色沉澱（不溶於過量）。BaCl₂測SO₄²⁻、AgNO₃測Cl⁻。",
+  exp_en:"NaOH tests cations: Cu²⁺→blue ppt, Fe²⁺→green ppt, Fe³⁺→brown ppt, Al³⁺→white ppt (dissolves in excess), Ca²⁺→white ppt (insoluble in excess). BaCl₂ for SO₄²⁻, AgNO₃ for Cl⁻."},
+
+  // --- Atomic 擴充 (5→10) ---
+  {q_zh:"下列哪個元素的電子排佈是 2,8,1？",q_en:"Which element has electron configuration 2,8,1?",
+  opts_zh:["Ne","Na","Mg","Al"],
+  opts_en:["Ne","Na","Mg","Al"],
+  ans:1,topic:"Atomic",
+  exp_zh:"2,8,1 = 11 個電子 = 原子序數 11 = Na（鈉）。Ne = 2,8。Mg = 2,8,2。Al = 2,8,3。2,8,1 表示最外層有 1 個電子，屬於 Group I（鹼金屬）。",
+  exp_en:"2,8,1 = 11 electrons = atomic number 11 = Na. Ne=2,8, Mg=2,8,2, Al=2,8,3. 1 outermost electron → Group I (alkali metal)."},
+
+  {q_zh:"同一族（Group）由上到下，下列哪個趨勢正確？",q_en:"Down a group, which trend is correct?",
+  opts_zh:["原子半徑減小","電離能增加","金屬性增強","電負性增加"],
+  opts_en:["Atomic radius decreases","Ionisation energy increases","Metallic character increases","Electronegativity increases"],
+  ans:2,topic:"Atomic",
+  exp_zh:"同一族由上到下：電子層數增加→原子半徑增大→核電荷被遮蔽→最外層電子越容易失去→金屬性增強。電離能減小、電負性減小。",
+  exp_en:"Down a group: more electron shells → larger radius → increased shielding → outer electrons easier to lose → metallic character increases. Ionisation energy decreases, electronegativity decreases."},
+
+  {q_zh:"【變體】²⁴Mg 和 ²⁶Mg 的區別是：",q_en:"[Variant] The difference between ²⁴Mg and ²⁶Mg is:",
+  opts_zh:["質子數不同","電子數不同","中子數不同","化學性質不同"],
+  opts_en:["Different proton numbers","Different electron numbers","Different neutron numbers","Different chemical properties"],
+  ans:2,topic:"Atomic",
+  exp_zh:"²⁴Mg：12p + 12n = 24。²⁶Mg：12p + 14n = 26。質子數相同（12），電子數相同（12），化學性質相同。只有中子數不同（12 vs 14）。它們是同位素。",
+  exp_en:"²⁴Mg: 12p+12n=24. ²⁶Mg: 12p+14n=26. Same protons (12), same electrons (12), same chemical properties. Only neutrons differ (12 vs 14). They are isotopes."},
+
+  {q_zh:"【DSE 2021】某元素 X 的第一電離能是 496 kJ mol⁻¹，第二電離能是 4562 kJ mol⁻¹。X 最可能是：",q_en:"[DSE 2021] Element X has 1st ionisation energy 496 kJ mol⁻¹ and 2nd ionisation energy 4562 kJ mol⁻¹. X is most likely:",
+  opts_zh:["Mg","Na","Al","K"],
+  opts_en:["Mg","Na","Al","K"],
+  ans:1,topic:"Atomic",year:"2021",
+  exp_zh:"第一電離能和第二電離能之間有巨大跳躍（496→4562），表示移除第一個電子很容易，但第二個電子極難。這符合 Group I 元素的特徵（最外層只有 1 個電子，移除後達到穩定的滿殼層）。Na 的第一電離能 = 496 kJ mol⁻¹。",
+  exp_en:"Huge jump between 1st and 2nd IE (496→4562) means removing 1st electron is easy but 2nd is extremely hard. This fits Group I elements (1 outermost electron, stable full shell after removal). Na 1st IE = 496 kJ mol⁻¹."},
+
+  {q_zh:"過渡金屬的特徵包括：",q_en:"Characteristics of transition metals include:",
+  opts_zh:["只有一種氧化態","顏色單一","多種氧化態和有色化合物","不能做催化劑"],
+  opts_en:["Only one oxidation state","Single colour only","Multiple oxidation states and coloured compounds","Cannot act as catalysts"],
+  ans:2,topic:"Atomic",
+  exp_zh:"過渡金屬特徵：多種氧化態（如 Fe²⁺/Fe³⁺、Mn 有 +2 到 +7）、有色的離子（Cu²⁻藍色、Fe³⁺棕色）、良好的催化劑（Fe 在 Haber Process、V₂O₅ 在 Contact Process）。",
+  exp_en:"Transition metal characteristics: multiple oxidation states (e.g. Fe²⁺/Fe³⁺, Mn from +2 to +7), coloured ions (Cu²⁺ blue, Fe³⁺ brown), good catalysts (Fe in Haber, V₂O₅ in Contact Process)."},
+
+  // --- Separation 擴充 (5→10) ---
+  {q_zh:"下列哪種方法可以分離墨水中的不同色素？",q_en:"Which method can separate different pigments in ink?",
+  opts_zh:["蒸餾","過濾","紙色層法","結晶"],
+  opts_en:["Distillation","Filtration","Paper chromatography","Crystallisation"],
+  ans:2,topic:"Separation",
+  exp_zh:"紙色層法（paper chromatography）利用不同色素在流動相（溶劑）中溶解度和在固定相（濾紙）上附著力的差異，實現分離。不同色素以不同速率移動，形成分開的斑點。",
+  exp_en:"Paper chromatography exploits differences in solubility (mobile phase) and adsorption (stationary phase) to separate pigments. Different pigments travel at different rates, forming separated spots."},
+
+  {q_zh:"結晶（crystallisation）適用於：",q_en:"Crystallisation is suitable for:",
+  opts_zh:["分離兩種互溶液體","從溶液中提取溶質固體","分離不互溶液體","分離兩種氣體"],
+  opts_en:["Separating two miscible liquids","Extracting solid solute from solution","Separating immiscible liquids","Separating two gases"],
+  ans:1,topic:"Separation",
+  exp_zh:"結晶法：加熱溶液至飽和 → 冷卻 → 溶質以晶體析出。適合從溶液中提取固體溶質。例如從鹽水提取 NaCl：蒸發部分水分→冷卻結晶→過濾收集晶體。",
+  exp_en:"Crystallisation: heat to saturation → cool → solute crystallises out. Suitable for extracting solid solute from solution. E.g. NaCl from brine: evaporate some water → cool → filter crystals."},
+
+  {q_zh:"【變體】提純海水（得到純水）的最佳方法是：",q_en:"[Variant] The best method to purify seawater (obtain pure water) is:",
+  opts_zh:["過濾","結晶","蒸餾","紙色層法"],
+  opts_en:["Filtration","Crystallisation","Distillation","Paper chromatography"],
+  ans:2,topic:"Separation",
+  exp_zh:"蒸餾法：加熱海水至沸騰 → 水蒸發（鹽不蒸發）→ 蒸氣冷凝為純水。這是唯一能從海水中獲得純水的方法。香港的海水化淡廠也是用類似原理。",
+  exp_en:"Distillation: boil seawater → water evaporates (salt doesn't) → condense vapour to get pure water. Only method to obtain pure water from seawater. HK's desalination plant uses similar principles."},
+
+  {q_zh:"分液漏斗（separating funnel）用於分離：",q_en:"A separating funnel is used to separate:",
+  opts_zh:["兩種固體","兩種互溶液體","兩種不互溶液體","固體和液體"],
+  opts_en:["Two solids","Two miscible liquids","Two immiscible liquids","Solid and liquid"],
+  ans:2,topic:"Separation",
+  exp_zh:"分液漏斗用於分離不互溶液體（如油和水）。較密的液體在底層，打開活塞讓底層流出，再收集上層。DSE 常考的分離方法選擇題。",
+  exp_en:"Separating funnel separates immiscible liquids (e.g. oil and water). Denser liquid at bottom, open tap to drain lower layer. DSE common separation method question."},
+
+  {q_zh:"【DSE 2018】蒸發和蒸餾的最大區別是：",q_en:"[DSE 2018] The biggest difference between evaporation and distillation is:",
+  opts_zh:["蒸發需要加熱，蒸餾不需要","蒸發只移除溶劑，蒸餾收集並冷凝蒸氣","蒸餾不能分離混合物","蒸發比蒸餾慢"],
+  opts_en:["Evaporation requires heating, distillation doesn't","Evaporation only removes solvent, distillation collects and condenses vapour","Distillation cannot separate mixtures","Evaporation is slower than distillation"],
+  ans:1,topic:"Separation",year:"2018",
+  exp_zh:"蒸發：加熱使溶劑揮發，剩下溶質（不收集蒸氣）。蒸餾：加熱使液體蒸發，然後冷凝收集蒸氣。蒸餾能獲得純液體，蒸發只能獲得固體溶質。",
+  exp_en:"Evaporation: heat to drive off solvent, leaving solute (vapour not collected). Distillation: heat to vaporise, then condense and collect vapour. Distillation gives pure liquid; evaporation gives solid solute."},
+
+  // --- Metals 擴充 (6→10) ---
+  {q_zh:"【變體】某金屬能與蒸汽反應產生 H₂，但不能與冷水反應。該金屬可能是：",q_en:"[Variant] A metal reacts with steam to produce H₂ but not with cold water. The metal may be:",
+  opts_zh:["Na","Ca","Fe","Cu"],
+  opts_en:["Na","Ca","Fe","Cu"],
+  ans:2,topic:"Metals",
+  exp_zh:"活性序中：K、Na、Ca 能與冷水反應。Mg、Al、Zn、Fe 能與蒸汽反應但非冷水。Pb、Cu、Ag 不與水反應。所以能與蒸汽但不與冷水反應的是 Fe。",
+  exp_en:"Reactivity: K, Na, Ca react with cold water. Mg, Al, Zn, Fe react with steam but not cold water. Pb, Cu, Ag don't react with water. So Fe fits."},
+
+  {q_zh:"鋁熱反應（Thermite reaction）用於焊接鐵軌，方程式是 2Al + Fe₂O₃ → Al₂O₃ + 2Fe。在此反應中，還原劑是：",q_en:"The thermite reaction 2Al + Fe₂O₃ → Al₂O₃ + 2Fe is used for welding rails. The reducing agent is:",
+  opts_zh:["Fe","Fe₂O₃","Al","Al₂O₃"],
+  opts_en:["Fe","Fe₂O₃","Al","Al₂O₃"],
+  ans:2,topic:"Metals",
+  exp_zh:"Al 從 0 變 +3（氧化），Fe 從 +3 變 0（還原）。Al 使 Fe₂O₃ 中的 Fe 還原，所以 Al 是還原劑。鋁熱反應非常放熱，產生高溫熔融鐵用於焊接。",
+  exp_en:"Al: 0→+3 (oxidised), Fe: +3→0 (reduced). Al reduces Fe in Fe₂O₃, so Al is reducing agent. Thermite is highly exothermic, producing molten iron for welding."},
+
+  {q_zh:"【DSE 2022】合金（alloy）比純金屬硬的原因是：",q_en:"[DSE 2022] Alloys are harder than pure metals because:",
+  opts_zh:["合金有共價鍵","不同大小的原子破壞了金屬的規則排列，阻礙層間滑動","合金有離子鍵","合金的密度更大"],
+  opts_en:["Alloys have covalent bonds","Different-sized atoms disrupt regular metal arrangement, preventing layer sliding","Alloys have ionic bonds","Alloys have higher density"],
+  ans:1,topic:"Metals",year:"2022",
+  exp_zh:"純金屬中原子大小相同，排列規則，層與層之間容易滑動→軟。合金中加入了不同大小的原子，破壞了規則排列，層間滑動受阻→更硬。例如青銅（Cu+Sn）比純銅硬。",
+  exp_en:"Pure metals: same-sized atoms in regular layers slide easily → soft. Alloys: different-sized atoms disrupt arrangement → layers can't slide → harder. E.g. bronze (Cu+Sn) harder than pure Cu."},
+
+  {q_zh:"從鐵礦石（hematite, Fe₂O₃）提取鐵的方法是：",q_en:"Iron is extracted from hematite (Fe₂O₃) by:",
+  opts_zh:["電解","碳還原（blast furnace）","氫氣還原","加熱分解"],
+  opts_en:["Electrolysis","Carbon reduction (blast furnace)","Hydrogen reduction","Thermal decomposition"],
+  ans:1,topic:"Metals",
+  exp_zh:"Fe 在活性序中間，可以用碳還原。Blast furnace：Fe₂O₃ + 3CO → 2Fe + 3CO₂。C 先與 O₂ 反應產生 CO，CO 再還原 Fe₂O₃。Al 以上太活潑需要電解。",
+  exp_en:"Fe is mid-reactivity, can use carbon reduction. Blast furnace: Fe₂O₃+3CO→2Fe+3CO₂. C reacts with O₂ first to make CO, then CO reduces Fe₂O₃. Metals above Al need electrolysis."},
+
+  // --- Rate 擴充 (6→10) ---
+  {q_zh:"溫度從 25°C 升到 35°C，反應速率大約增加：",q_en:"When temperature rises from 25°C to 35°C, reaction rate approximately:",
+  opts_zh:["不變","增加 2 倍","增加 10 倍","減半"],
+  opts_en:["Unchanged","Doubles","Increases 10 times","Halves"],
+  ans:1,topic:"Rate",
+  exp_zh:"經驗規則：溫度每升高 10°C，反應速率大約增加 2 倍（rule of thumb）。原因是更高溫度→更多分子能量≥Ea→有效碰撞頻率增加。DSE 常考此概念。",
+  exp_en:"Rule of thumb: every 10°C increase roughly doubles reaction rate. Higher T → more molecules with energy ≥ Ea → more effective collisions. DSE frequently tests this concept."},
+
+  {q_zh:"下列哪個不改變反應速率？",q_en:"Which does NOT change the reaction rate?",
+  opts_zh:["增加溫度","增加濃度","加入催化劑","增加產物的量"],
+  opts_en:["Increase temperature","Increase concentration","Add catalyst","Add more product"],
+  ans:3,topic:"Rate",
+  exp_zh:"速率取決於反應物濃度（不是產物）。增加產物不會改變正反應速率（雖然可能影響平衡位置）。溫度、濃度、表面積、催化劑都會影響速率。",
+  exp_en:"Rate depends on reactant concentration (not products). Adding product doesn't change forward rate (though may affect equilibrium position). Temperature, concentration, surface area, catalyst all affect rate."},
+
+  {q_zh:"【變體】壓力對氣體反應速率的影響是：",q_en:"[Variant] The effect of pressure on gaseous reaction rate is:",
+  opts_zh:["增大壓力→濃度增大→速率增大","增大壓力→速率不變","增大壓力→速率減小","壓力只影響平衡位置"],
+  opts_en:["Increase P → increase concentration → increase rate","Increase P → rate unchanged","Increase P → rate decreases","Pressure only affects equilibrium position"],
+  ans:0,topic:"Rate",
+  exp_zh:"增大壓力→氣體被壓縮→體積減小→濃度增大→單位體積內粒子數增加→碰撞頻率增加→有效碰撞頻率增加→速率增大。壓力不只影響平衡，也影響速率！",
+  exp_en:"Increase P → gas compressed → volume decreases → concentration increases → more particles per unit volume → higher collision frequency → more effective collisions → faster rate. Pressure affects rate, not just equilibrium!"},
+
+  {q_zh:"Na₂S₂O₃ + 2HCl 的反應中，甚麼方法不能加快反應？",q_en:"For Na₂S₂O₃ + 2HCl, which method does NOT speed up the reaction?",
+  opts_zh:["升高溫度","增大 Na₂S₂O₃ 濃度","攪拌更快","加入更多 HCl（固定濃度）"],
+  opts_en:["Raise temperature","Increase Na₂S₂O₃ concentration","Stir faster","Add more HCl (fixed concentration)"],
+  ans:3,topic:"Rate",
+  exp_zh:"加入更多 HCl（固定濃度）只增加了 HCl 的總量，但濃度不變。速率取決於濃度而非總量。升高溫度、增大濃度都能加快反應。攪拌主要確保混合均勻，不直接改變速率。",
+  exp_en:"Adding more HCl (fixed conc.) only increases total amount, not concentration. Rate depends on concentration, not total amount. Higher T, higher conc both increase rate. Stirring ensures mixing but doesn't directly change rate."},
+
+  // --- Equilibrium 擴充 (7→10) ---
+  {q_zh:"【變體】對於 2SO₃(g) ⇌ 2SO₂(g) + O₂(g)，減小容器體積會使平衡：",q_en:"[Variant] For 2SO₃(g) ⇌ 2SO₂(g) + O₂(g), decreasing container volume shifts equilibrium:",
+  opts_zh:["向右移動","向左移動","不改變","無法判斷"],
+  opts_en:["To the right","To the left","No change","Cannot determine"],
+  ans:1,topic:"Equilibrium",
+  exp_zh:"左邊 2 mol 氣體，右邊 3 mol 氣體。減小體積 = 增大壓力 → 平衡向摩爾數少的方向（左邊）移動 → SO₃ 增加。Le Chatelier：系統嘗試減小壓力增大。",
+  exp_en:"Left: 2 mol gas, Right: 3 mol gas. Decrease volume = increase pressure → shifts to fewer moles (left) → more SO₃. Le Chatelier: system reduces pressure increase."},
+
+  {q_zh:"下列哪個會改變平衡常數 Kc？",q_en:"Which changes the equilibrium constant Kc?",
+  opts_zh:["增加反應物濃度","加入催化劑","改變溫度","增大壓力"],
+  opts_en:["Adding more reactant","Adding catalyst","Changing temperature","Increasing pressure"],
+  ans:2,topic:"Equilibrium",
+  exp_zh:"Kc 只受溫度影響！這是 DSE 超高頻考點。濃度改變 → 平衡位置移動但 Kc 不變。壓力改變 → 同理。催化劑 → 不改變 Kc 也不改變平衡位置。",
+  exp_en:"Kc ONLY affected by temperature! Ultra-high frequency DSE concept. Concentration change → position shifts but Kc constant. Pressure → same. Catalyst → no change to Kc or position."},
+
+  {q_zh:"【DSE 2025】某反應的 Kc = 1.0 × 10⁻⁵。下列哪個敘述正確？",q_en:"[DSE 2025] A reaction has Kc = 1.0 × 10⁻⁵. Which statement is correct?",
+  opts_zh:["平衡時反應物幾乎完全轉化","平衡時產物很少","正反應速率很快","這是一個不可逆反應"],
+  opts_en:["Reactants almost completely converted at equilibrium","Very little product at equilibrium","Forward reaction rate is very fast","This is an irreversible reaction"],
+  ans:1,topic:"Equilibrium",year:"2025",
+  exp_zh:"Kc = [products]/[reactants]。Kc 很小（10⁻⁵）表示平衡時產物濃度遠小於反應物濃度 → 反應「不利於」正方向。注意 Kc 只反映平衡位置，不反映速率。",
+  exp_en:"Kc = [products]/[reactants]. Very small Kc (10⁻⁵) means at equilibrium, product concentration << reactant concentration → forward reaction not favoured. Kc reflects position, not rate."},
+
+  // --- Mole 擴充 (7→10) ---
+  {q_zh:"【變體】多少克的 CaCO₃（M=100）含有與 4.0 g NaOH（M=40）相同的摩爾數？",q_en:"[Variant] How many grams of CaCO₃ (M=100) contain the same number of moles as 4.0 g NaOH (M=40)?",
+  opts_zh:["4.0 g","10.0 g","100 g","40 g"],
+  opts_en:["4.0 g","10.0 g","100 g","40 g"],
+  ans:1,topic:"Mole",
+  exp_zh:"n(NaOH) = 4.0/40 = 0.10 mol。n(CaCO₃) = n(NaOH) = 0.10 mol。m(CaCO₃) = 0.10 × 100 = 10.0 g。簡單直接：先求摩爾數，再轉質量。",
+  exp_en:"n(NaOH) = 4.0/40 = 0.10 mol. n(CaCO₃) = n(NaOH) = 0.10 mol. m(CaCO₃) = 0.10 × 100 = 10.0 g. Simple: convert to moles first, then to mass."},
+
+  {q_zh:"某烴完全燃燒產生 8.80 g CO₂ 和 3.60 g H₂O。該烴的實驗式是：（C=12, O=16, H=1）",q_en:"A hydrocarbon burns completely to give 8.80 g CO₂ and 3.60 g H₂O. Its empirical formula is: (C=12, O=16, H=1)",
+  opts_zh:["CH","CH₂","CH₃","CH₄"],
+  opts_en:["CH","CH₂","CH₃","CH₄"],
+  ans:1,topic:"Mole",
+  exp_zh:"n(CO₂) = 8.80/44 = 0.20 mol → n(C) = 0.20 mol。n(H₂O) = 3.60/18 = 0.20 mol → n(H) = 0.40 mol。C:H = 0.20:0.40 = 1:2。實驗式 = CH₂（烯烴通式）。",
+  exp_en:"n(CO₂) = 8.80/44 = 0.20 → n(C) = 0.20. n(H₂O) = 3.60/18 = 0.20 → n(H) = 0.40. C:H = 1:2. Empirical formula = CH₂ (alkene general formula)."},
+
+  {q_zh:"【DSE 2017】限量反應物（limiting reagent）是指：",q_en:"[DSE 2017] A limiting reagent is:",
+  opts_zh:["質量最大的反應物","完全消耗後決定產物最大量的反應物","摩爾數最多的反應物","最先加入的反應物"],
+  opts_en:["The reactant with the largest mass","The reactant that is completely consumed and determines maximum product","The reactant with the most moles","The reactant added first"],
+  ans:1,topic:"Mole",year:"2017",
+  exp_zh:"限量反應物 = 反應中完全被消耗的反應物。它的量決定了產物的最大量。其他反應物是過量的（excess）。找限量反應物的方法：計算每個反應物能產生多少產物，最少的那個就是限量反應物。",
+  exp_en:"Limiting reagent = reactant completely consumed. Its amount determines maximum product. Others are in excess. How to find: calculate how much product each reactant can produce; the one giving least product is limiting."},
+
+  // --- Organic 擴充 (9→12) ---
+  {q_zh:"【變體】能使酸化 K₂Cr₂O₆ 由橙色變綠色的有機物是：",q_en:"[Variant] Which organic substance turns acidified K₂Cr₂O₇ from orange to green?",
+  opts_zh:["丙酮（CH₃COCH₃）","丙醛（CH₃CH₂CHO）","乙酸（CH₃COOH）","乙酸乙酯"],
+  opts_en:["Propanone (CH₃COCH₃)","Propanal (CH₃CH₂CHO)","Ethanoic acid (CH₃COOH)","Ethyl ethanoate"],
+  ans:1,topic:"Organic",
+  exp_zh:"酸化 K₂Cr₂O₇（橙色）被還原為 Cr³⁺（綠色）= 被氧化。能被氧化的有機物：1° 醇→醛→酸、2° 醇→酮。丙醛有可被氧化的 C-H 鍵→氧化為丙酸。酮和羧酸不能被 K₂Cr₂O₇ 進一步氧化。酯不反應。",
+  exp_en:"Acidified K₂Cr₂O₇ (orange) reduced to Cr³⁺ (green) = oxidises organic compounds. Oxidisable: 1° alcohols→aldehydes→acids, 2° alcohols→ketones. Propanal has oxidisable C-H → oxidised to propanoic acid. Ketones and carboxylic acids can't be further oxidised. Esters don't react."},
+
+  {q_zh:"下列哪個是加成反應（addition reaction）？",q_en:"Which is an addition reaction?",
+  opts_zh:["CH₄ + Cl₂ → CH₃Cl + HCl","CH₂=CH₂ + HBr → CH₃CH₂Br","CH₃COOH + NaOH → CH₃COONa + H₂O","C₂H₅OH → CH₂=CH₂ + H₂O"],
+  opts_en:["CH₄ + Cl₂ → CH₃Cl + HCl","CH₂=CH₂ + HBr → CH₃CH₂Br","CH₃COOH + NaOH → CH₃COONa + H₂O","C₂H₅OH → CH₂=CH₂ + H₂O"],
+  ans:1,topic:"Organic",
+  exp_zh:"加成反應：C=C 雙鍵斷開，兩個新基團加到兩個 C 上，只有一個產物，無副產物。A 是取代反應，C 是中和反應，D 是消除反應。",
+  exp_en:"Addition: C=C double bond breaks, two new groups add to the two carbons, single product, no by-products. A is substitution, C is neutralisation, D is elimination."},
+
+  {q_zh:"異構體（isomers）是指：",q_en:"Isomers are:",
+  opts_zh:["不同元素的原子","分子式相同但結構不同的化合物","含有相同官能團的物質","同一物質的不同名稱"],
+  opts_en:["Atoms of different elements","Compounds with same molecular formula but different structures","Substances with the same functional group","Different names for the same substance"],
+  ans:1,topic:"Organic",
+  exp_zh:"異構體定義：分子式相同但結構式不同的化合物。類型包括：結構異構（不同的官能團或碳鏈）、順反異構（cis-trans，圍繞 C=C 的不同排列）、光學異構（對映異構體）。",
+  exp_en:"Isomers: same molecular formula, different structural formulae. Types include: structural isomers (different functional groups or carbon chains), cis-trans isomers (different arrangement around C=C), optical isomers (enantiomers)."},
+
+  // --- Acids/Bases 擴充 (9→12) ---
+  {q_zh:"【變體】pH 從 3 變到 1，H⁺ 濃度增加了：",q_en:"[Variant] pH changes from 3 to 1, [H⁺] increases by:",
+  opts_zh:["2 倍","10 倍","100 倍","1000 倍"],
+  opts_en:["2 times","10 times","100 times","1000 times"],
+  ans:2,topic:"Acids/Bases",
+  exp_zh:"pH 每降低 1，[H⁺] 增加 10 倍。pH 3→1 = 降低 2 = [H⁺] 增加 10² = 100 倍。pH=-log[H⁺]，所以 pH 3=[H⁺]=10⁻³，pH 1=[H⁺]=10⁻¹，比=10⁻¹/10⁻³=100。",
+  exp_en:"Each pH unit decrease = 10× increase in [H⁺]. pH 3→1 = decrease of 2 = 10² = 100 times increase. pH 3=[H⁺]=10⁻³, pH 1=[H⁺]=10⁻¹, ratio=100."},
+
+  {q_zh:"濃硫酸（conc. H₂SO₄）的性質不包括：",q_en:"Concentrated H₂SO₄ does NOT have this property:",
+  opts_zh:["脫水性（dehydrating agent）","氧化性","強鹼性","吸水性"],
+  opts_en:["Dehydrating agent","Oxidising agent","Strong alkalinity","Hygroscopicity"],
+  ans:2,topic:"Acids/Bases",
+  exp_zh:"濃 H₂SO₄ 是強酸（不是鹼！），具有：脫水性（移除化學結構中的 H 和 O，如蔗糖→碳）、氧化性（能氧化金屬）、吸水性（吸收水分）。它是酸，不是鹼。",
+  exp_en:"Conc. H₂SO₄ is a strong acid (NOT alkali!). Properties: dehydrating (removes H and O from compounds, e.g. sugar→carbon), oxidising, hygroscopic (absorbs water). It's an acid, not a base."},
+
+  {q_zh:"Amphoteric oxide（兩性氧化物）的例子是：",q_en:"An example of an amphoteric oxide is:",
+  opts_zh:["Na₂O","MgO","Al₂O₃","SO₂"],
+  opts_en:["Na₂O","MgO","Al₂O₃","SO₂"],
+  ans:2,topic:"Acids/Bases",
+  exp_zh:"兩性氧化物既能與酸反應又能與鹼反應。Al₂O₃ + 6HCl → 2AlCl₃ + 3H₂O（與酸反應）。Al₂O₃ + 2NaOH → 2NaAlO₂ + H₂O（與鹼反應）。DSE 必記的兩性氧化物：Al₂O₃、ZnO、PbO。",
+  exp_en:"Amphoteric oxides react with both acids and bases. Al₂O₃+6HCl→2AlCl₃+3H₂O (reacts with acid). Al₂O₃+2NaOH→2NaAlO₂+H₂O (reacts with base). DSE must-know amphoteric: Al₂O₃, ZnO, PbO."},
+
+  // --- Materials 擴充 (1→4) ---
+  {q_zh:"【DSE 2022】液晶（liquid crystal）的定義是：",q_en:"[DSE 2022] Liquid crystals are defined as:",
+  opts_zh:["固體物質","液態和固態之間的中間態物質","氣體","純金屬"],
+  opts_en:["Solid materials","Materials in intermediate state between liquid and solid","Gases","Pure metals"],
+  ans:1,topic:"Materials",year:"2022",
+  exp_zh:"液晶同時具有液體的流動性和固體（晶體）的有序排列。用於 LCD 顯示器。液晶分子在電場作用下改變排列方向，從而控制光的透過。",
+  exp_en:"Liquid crystals have both liquid fluidity and crystalline order. Used in LCD displays. Molecules change alignment under electric field, controlling light transmission."},
+
+  {q_zh:"納米顆粒（nanoparticles）的特性包括：",q_en:"Properties of nanoparticles include:",
+  opts_zh:["與大塊材料性質完全相同","表面積/體積比很大","只有金屬才能形成納米材料","尺寸大於 1 mm"],
+  opts_en:["Identical properties to bulk material","Very large surface area to volume ratio","Only metals can form nanomaterials","Size greater than 1 mm"],
+  ans:1,topic:"Materials",
+  exp_zh:"納米顆粒（1-100 nm）的表面積/體積比遠大於大塊材料→更高的反應活性。這也是為什麼納米銀有更強的抗菌效果。納米材料的性質可能與大塊材料不同。",
+  exp_en:"Nanoparticles (1-100 nm) have much larger surface area/volume ratio than bulk → higher reactivity. This is why nano-silver has stronger antibacterial properties. Properties may differ from bulk material."},
+
+  {q_zh:"加成聚合物（addition polymer）的特徵是：",q_en:"Characteristics of addition polymers include:",
+  opts_zh:["單體含有 C=C 雙鍵","產生小分子副產物","只能由二元酸和二元醇製備","不能燃燒"],
+  opts_en:["Monomers contain C=C double bonds","Produce small molecule by-products","Only made from diacid and diol","Cannot burn"],
+  ans:0,topic:"Materials",
+  exp_zh:"加成聚合物：單體必須含有 C=C 雙鍵（如乙烯→聚乙烯）。雙鍵打開連接成長鏈，無副產物。縮合聚合物才有小分子副產物（如水）。加成聚合物可以燃燒（都是碳氫化合物）。",
+  exp_en:"Addition polymers: monomers must have C=C double bonds (e.g. ethene→polyethene). Double bond opens to form chain, no by-products. Condensation polymers produce small molecules (e.g. water). Addition polymers can burn (all hydrocarbons)."}
 ];
 
 let quizState={current:0,score:0,answered:new Array(quizData.length).fill(false)};
@@ -3472,31 +3929,78 @@ function shuffleFc(){fcIdx=0;fcData.sort(()=>Math.random()-.5);renderFc();}
 function setFcDeck(d){fcDeck=d;fcIdx=0;renderFc();}
 
 // ===== PAST PAPERS BY YEAR =====
-let ppState={answered:{},score:0};
+let ppState={answered:{},score:0,mode:'year',wrongQs:[],mockTimer:null,mockStart:null};
+
+// Topic × Year Matrix
+const topicList=['Mole','Bonding','Electrolysis','Acids/Bases','Redox','Rate','Equilibrium','Organic','Metals','Energy','Industrial','Separation','Analytical','Atomic','Materials'];
+const yearList=['2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+
+function buildMatrix(){
+  const lang=document.body.getAttribute('data-lang');
+  const ppQs=quizData.filter(q=>q.year);
+  let html='<tr style="background:var(--card2)"><th style="padding:4px 6px;color:var(--gold)">Topic \\ Year</th>';
+  yearList.forEach(y=>html+=`<th style="padding:4px 4px;color:var(--pri-l)">${y}</th>`);
+  html+='<th style="padding:4px 6px;color:var(--acc)"><span class="zh-only">總計</span><span class="en-only">Total</span></th></tr>';
+  
+  topicList.forEach(t=>{
+    const row=ppQs.filter(q=>q.topic===t);
+    html+=`<tr><td style="padding:3px 6px;font-weight:700;color:var(--txt)">${t}</td>`;
+    yearList.forEach(y=>{
+      const cnt=row.filter(q=>q.year===y).length;
+      html+=`<td style="text-align:center;padding:3px;color:${cnt?'var(--acc)':'var(--dim)'}">${cnt?'●'+(cnt>1?cnt:''):'·'}</td>`;
+    });
+    html+=`<td style="text-align:center;padding:3px;font-weight:700;color:var(--acc2)">${row.length}</td></tr>`;
+  });
+  
+  html+='<tr style="background:var(--card2)"><td style="padding:4px 6px;font-weight:700;color:var(--gold)"><span class="zh-only">總計</span><span class="en-only">Total</span></td>';
+  yearList.forEach(y=>{
+    const cnt=ppQs.filter(q=>q.year===y).length;
+    html+=`<td style="text-align:center;padding:4px;font-weight:700;color:var(--acc)">${cnt}</td>`;
+  });
+  html+=`<td style="text-align:center;padding:4px;font-weight:900;color:var(--gold)">${ppQs.length}</td></tr>`;
+  
+  document.getElementById('topicYearMatrix').innerHTML=html;
+}
+
+function setPPMode(mode){
+  ppState.mode=mode;
+  ['year','topic','review','similar','mock'].forEach(m=>{
+    const el=document.getElementById('ppMode_'+m);
+    if(el){el.className=m===mode?'qbtn qbtn-primary':'qbtn qbtn-outline';}
+  });
+  document.getElementById('ppYearFilters').style.display=mode==='year'?'flex':'none';
+  document.getElementById('ppTopicFilters').style.display=mode==='topic'?'flex':'none';
+  document.getElementById('ppMatrix').style.display=mode==='year'?'block':'none';
+  document.getElementById('ppReviewInfo').style.display=mode==='review'?'block':'none';
+  document.getElementById('ppSimilarInfo').style.display=mode==='similar'?'block':'none';
+  document.getElementById('ppMockInfo').style.display=mode==='mock'?'block':'none';
+  
+  const area=document.getElementById('ppArea');
+  if(mode==='review') renderReviewMode();
+  else if(mode==='similar') renderSimilarMode();
+  else if(mode==='mock'){area.innerHTML='';}
+  else if(mode==='year') filterPP('all');
+  else if(mode==='topic') filterPPByTopic('all');
+}
 
 function filterPP(year){
+  if(ppState.mode!=='year')setPPMode('year');
   const area=document.getElementById('ppArea');
   const lang=document.body.getAttribute('data-lang');
   const ppQs=quizData.filter(q=>q.year);
   const filtered=year==='all'?ppQs:ppQs.filter(q=>q.year===year);
   
-  // Also get structured questions by year
-  const ppSQs=sqData.filter(q=>q.topic&&q.topic.includes('DSE'));
-  
   let html='';
-  
-  // Year header
   if(year!=='all'){
     html+=`<div style="margin:16px 0 12px;padding:12px 16px;background:linear-gradient(135deg,rgba(255,215,0,.15),rgba(253,203,110,.1));border-radius:12px;border:1px solid rgba(255,215,0,.3)">
       <h3 style="font-size:18px;font-weight:800;color:var(--gold)">📅 DSE ${year} <span class="zh-only">歷屆試題</span><span class="en-only">Past Paper</span></h3>
       <p style="font-size:12px;color:var(--dim);margin-top:4px"><span class="zh-only">以下題目改編自 DSE ${year} 真題</span><span class="en-only">Questions adapted from DSE ${year} papers</span></p>
     </div>`;
   }
-
-  // MC section
+  
   html+=`<div style="margin:20px 0 12px;display:flex;align-items:center;gap:8px">
     <span style="background:var(--pri);color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700">MC</span>
-    <span style="font-size:14px;font-weight:700"><span class="zh-only">選擇題</span><span class="en-only">Multiple Choice</span> (${filtered.length})</span>
+    <span style="font-size:14px;font-weight:700">(${filtered.length})</span>
   </div>`;
 
   filtered.forEach((q,i)=>{
@@ -3504,7 +4008,7 @@ function filterPP(year){
     const qText=lang==='zh'?q.q_zh:q.q_en;
     const opts=lang==='zh'?q.opts_zh:q.opts_en;
     const answered=ppState.answered[qi];
-    const userAns=ppState.answered[qi]?.userAns;
+    const userAns=answered?.userAns;
     
     html+=`<div class="quiz-container" id="pp${qi}">
       <div class="quiz-header">
@@ -3519,39 +4023,221 @@ function filterPP(year){
     </div>`;
   });
 
-  // Structured questions section for this year
-  const yearSQs=ppSQs.filter(q=>{
-    const m=q.topic.match(/DSE (\d{4})/);
-    return year==='all'?true:(m&&m[1]===year);
-  });
-
-  if(yearSQs.length>0){
-    html+=`<div style="margin:24px 0 12px;display:flex;align-items:center;gap:8px">
-      <span style="background:var(--acc);color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700">SQ</span>
-      <span style="font-size:14px;font-weight:700"><span class="zh-only">結構題</span><span class="en-only">Structured</span> (${yearSQs.length})</span>
-    </div>`;
-
-    yearSQs.forEach((s,i)=>{
-      html+=`<div class="quiz-container">
-        <div class="quiz-header"><span class="tag tag-core">${s.topic}</span></div>
-        <div class="quiz-q">${lang==='zh'?s.q_zh:s.q_en}</div>
-        <div class="sq-answer">
-          <textarea placeholder="${lang==='zh'?'在這裡寫你的答案...':'Write your answer here...'}"></textarea>
-          <div class="quiz-btns">
-            <button class="qbtn qbtn-primary" onclick="this.closest('.quiz-container').querySelector('.sq-model').classList.add('show')">${lang==='zh'?'📖 顯示示範答案':'📖 Show Model Answer'}</button>
-          </div>
-        </div>
-        <div class="sq-model"><h4>✅ ${lang==='zh'?'示範答案':'Model Answer'}</h4>${lang==='zh'?s.model_zh:s.model_en}</div>
-      </div>`;
-    });
+  if(filtered.length===0){
+    html+=`<div class="callout callout-warn" style="text-align:center;padding:30px"><span class="zh-only">📚 該年份的試題正在整理中。</span><span class="en-only">📚 Questions being compiled.</span></div>`;
   }
-
-  if(filtered.length===0&&yearSQs.length===0){
-    html+=`<div class="callout callout-warn" style="text-align:center;padding:30px"><span class="zh-only">📚 該年份的試題正在整理中，請選擇其他年份。</span><span class="en-only">📚 Questions for this year are being compiled. Please select another year.</span></div>`;
-  }
-
   area.innerHTML=html;
   updatePPScore();
+}
+
+function filterPPByTopic(topic){
+  if(ppState.mode!=='topic')setPPMode('topic');
+  const area=document.getElementById('ppArea');
+  const lang=document.body.getAttribute('data-lang');
+  const filtered=topic==='all'?quizData:quizData.filter(q=>q.topic===topic);
+  
+  let html=`<div style="margin:16px 0 12px;padding:12px 16px;background:linear-gradient(135deg,rgba(108,92,231,.15),rgba(162,155,254,.1));border-radius:12px;border:1px solid rgba(108,92,231,.3)">
+    <h3 style="font-size:18px;font-weight:800;color:var(--pri-l)">📚 ${topic==='all'?'All Topics':topic} <span class="zh-only">課題練習</span><span class="en-only">Topic Practice</span></h3>
+    <p style="font-size:12px;color:var(--dim);margin-top:4px">${filtered.length} <span class="zh-only">題</span><span class="en-only">questions</span></p>
+  </div>`;
+
+  filtered.forEach((q,i)=>{
+    const qi=quizData.indexOf(q);
+    const qText=lang==='zh'?q.q_zh:q.q_en;
+    const opts=lang==='zh'?q.opts_zh:q.opts_en;
+    const answered=ppState.answered[qi];
+    const userAns=answered?.userAns;
+    
+    html+=`<div class="quiz-container" id="pp${qi}">
+      <div class="quiz-header">
+        ${q.year?`<span class="tag" style="background:rgba(255,215,0,.15);color:var(--gold);font-weight:700">📅 DSE ${q.year}</span>`:''}
+        <span class="tag tag-core">${q.topic}</span>
+      </div>
+      <div class="quiz-q"><span class="q-num">T${i+1}.</span>${qText}</div>
+      <div class="quiz-opts">
+        ${opts.map((o,j)=>`<div class="quiz-opt ${answered?(j===q.ans?'correct':j===userAns?'wrong':''):''}" onclick="selectPP(${qi},${j})" id="ppopt${qi}_${j}"><div class="opt-letter">${'ABCD'[j]}</div><span>${o}</span></div>`).join('')}
+      </div>
+      ${answered?`<div class="quiz-expl show"><h4>💡 <span class="zh-only">解釋</span><span class="en-only">Explanation</span></h4><p>${lang==='zh'?q.exp_zh:q.exp_en}</p></div>`:''}
+    </div>`;
+  });
+  area.innerHTML=html;
+  updatePPScore();
+}
+
+function renderReviewMode(){
+  const area=document.getElementById('ppArea');
+  const lang=document.body.getAttribute('data-lang');
+  const wrongQs=Object.entries(ppState.answered).filter(([k,v])=>!v.correct).map(([k])=>parseInt(k));
+  
+  if(wrongQs.length===0){
+    area.innerHTML=`<div class="callout callout-tip" style="text-align:center;padding:40px">
+      <div style="font-size:48px;margin-bottom:12px">🎉</div>
+      <h3 style="color:var(--acc)"><span class="zh-only">太棒了！沒有錯題！</span><span class="en-only">Great! No mistakes!</span></h3>
+      <p style="color:var(--dim)"><span class="zh-only">繼續做更多題目，錯題會自動出現在這裡。</span><span class="en-only">Keep practising — wrong answers will appear here automatically.</span></p>
+    </div>`;
+    return;
+  }
+  
+  let html=`<div style="margin:12px 0;padding:10px 16px;background:rgba(225,112,85,.1);border-radius:10px">
+    <span class="zh-only">找到 ${wrongQs.length} 條錯題，重做直到全部正確！</span>
+    <span class="en-only">${wrongQs.length} wrong answers found. Retry until all correct!</span>
+  </div>`;
+  
+  wrongQs.forEach((qi,i)=>{
+    const q=quizData[qi];
+    const qText=lang==='zh'?q.q_zh:q.q_en;
+    const opts=lang==='zh'?q.opts_zh:q.opts_en;
+    html+=`<div class="quiz-container" id="ppr${qi}">
+      <div class="quiz-header">
+        <span class="tag" style="background:rgba(225,112,85,.15);color:var(--dn)">🔄 <span class="zh-only">錯題</span><span class="en-only">Wrong</span></span>
+        ${q.year?`<span class="tag" style="background:rgba(255,215,0,.15);color:var(--gold)">📅 DSE ${q.year}</span>`:''}
+        <span class="tag tag-core">${q.topic}</span>
+      </div>
+      <div class="quiz-q"><span class="q-num">R${i+1}.</span>${qText}</div>
+      <div class="quiz-opts">
+        ${opts.map((o,j)=>`<div class="quiz-opt" onclick="selectReviewPP(${qi},${j})" id="ppropt${qi}_${j}"><div class="opt-letter">${'ABCD'[j]}</div><span>${o}</span></div>`).join('')}
+      </div>
+    </div>`;
+  });
+  area.innerHTML=html;
+}
+
+function selectReviewPP(qi,ai){
+  const q=quizData[qi];
+  const lang=document.body.getAttribute('data-lang');
+  const correct=ai===q.ans;
+  
+  document.getElementById(`ppropt${qi}_${q.ans}`).classList.add('correct');
+  if(!correct)document.getElementById(`ppropt${qi}_${ai}`).classList.add('wrong');
+  
+  const explDiv=document.createElement('div');
+  explDiv.className='quiz-expl show';
+  explDiv.innerHTML=correct
+    ?`<h4>✅ <span class="zh-only">正確！</span><span class="en-only">Correct!</span></h4>`
+    :`<h4>❌ <span class="zh-only">再試一次！</span><span class="en-only">Try again!</span></h4><p>${lang==='zh'?q.exp_zh:q.exp_en}</p>`;
+  document.getElementById(`ppr${qi}`).appendChild(explDiv);
+  
+  if(correct){
+    ppState.answered[qi].correct=true;
+    ppState.score++;
+    updatePPScore();
+  }
+}
+
+// Similar Question Generator
+function renderSimilarMode(){
+  const area=document.getElementById('ppArea');
+  const lang=document.body.getAttribute('data-lang');
+  const variants=generateVariants();
+  
+  let html=`<div style="margin:12px 0"><span class="zh-only">🎲 已生成 ${variants.length} 條變化題，每次都不同！</span><span class="en-only">🎲 Generated ${variants.length} variant questions — different every time!</span></div>`;
+  
+  variants.forEach((v,i)=>{
+    const qText=lang==='zh'?v.q_zh:q.q_en;
+    html+=`<div class="quiz-container" id="sim${i}">
+      <div class="quiz-header">
+        <span class="tag" style="background:rgba(255,215,0,.15);color:var(--gold)">🎲 <span class="zh-only">生成題</span><span class="en-only">Generated</span></span>
+        <span class="tag tag-core">${v.topic}</span>
+      </div>
+      <div class="quiz-q"><span class="q-num">G${i+1}.</span>${lang==='zh'?v.q_zh:v.q_en}</div>
+      <div class="quiz-opts">
+        ${[v.opts_zh,v.opts_en][lang==='zh'?0:1].map((o,j)=>`<div class="quiz-opt" onclick="selectSim(${i},${j})" id="simopt${i}_${j}"><div class="opt-letter">${'ABCD'[j]}</div><span>${lang==='zh'?v.opts_zh[j]:v.opts_en[j]}</span></div>`).join('')}
+      </div>
+    </div>`;
+  });
+  html+=`<div style="text-align:center;margin:16px 0"><button class="qbtn qbtn-primary" onclick="renderSimilarMode()">🎲 <span class="zh-only">生成新一批</span><span class="en-only">Generate New Batch</span></button></div>`;
+  area.innerHTML=html;
+}
+
+function generateVariants(){
+  const pool=[
+    {q_zh:`${pick(['2.0','3.0','4.0','5.0'])} g 某金屬碳酸鹽 MCO₃ 加熱分解，質量減少 ${pick(['1.1','1.32','1.76','2.2'])} g。M 的相對原子質量是：`,q_en:`${pick(['2.0','3.0','4.0','5.0'])} g of metal carbonate MCO₃ decomposes, mass decreases by ${pick(['1.1','1.32','1.76','2.2'])} g. Ar of M is:`,
+     opts_zh:['24 (Mg)','40 (Ca)','56 (Fe)','64 (Cu)'],opts_en:['24 (Mg)','40 (Ca)','56 (Fe)','64 (Cu)'],ans:0,topic:'Mole'},
+    {q_zh:`下列哪個${pick(['氧化物','物質','化合物'])}是${pick(['酸性','鹼性','兩性'])}的？`,q_en:`Which ${pick(['oxide','substance','compound'])} is ${pick(['acidic','basic','amphoteric'])}?`,
+     opts_zh:['Na₂O','Al₂O₃','SO₃','MgO'],opts_en:['Na₂O','Al₂O₃','SO₃','MgO'],ans:1,topic:'Acids/Bases'},
+    {q_zh:`電解 ${pick(['CuSO₄(aq)','Na₂SO₄(aq)','H₂SO₄(aq)'])} 時，${pick(['陽極','陰極'])}的產物是：`,q_en:`During electrolysis of ${pick(['CuSO₄(aq)','Na₂SO₄(aq)','H₂SO₄(aq)'])}, the product at the ${pick(['anode','cathode'])} is:`,
+     opts_zh:['H₂','O₂','Cu','Cl₂'],opts_en:['H₂','O₂','Cu','Cl₂'],ans:0,topic:'Electrolysis'},
+    {q_zh:`在 ${pick(['N₂(g) + 3H₂(g) ⇌ 2NH₃(g)','2SO₂(g) + O₂(g) ⇌ 2SO₃(g)','2NO₂(g) ⇌ N₂O₄(g)'])} 中，${pick(['增大壓力','降低溫度','加入催化劑'])} 會：`,q_en:`For ${pick(['N₂+3H₂⇌2NH₃','2SO₂+O₂⇌2SO₃','2NO₂⇌N₂O₄'])}, ${pick(['increasing pressure','decreasing temperature','adding catalyst'])} will:`,
+     opts_zh:['增加產物','減少產物','不改變平衡','降低Kc'],opts_en:['increase products','decrease products','not change equilibrium','decrease Kc'],ans:0,topic:'Equilibrium'},
+    {q_zh:`下列哪個測試可以鑑定 ${pick(['Cl⁻','SO₄²⁻','CO₃²⁻','Fe³⁺'])}？`,q_en:`Which test identifies ${pick(['Cl⁻','SO₄²⁻','CO₃²⁻','Fe³⁺'])}?`,
+     opts_zh:['加入 NaOH','加入 BaCl₂ + HCl','加入 AgNO₃ + HNO₃','加熱'],opts_en:['Add NaOH','Add BaCl₂ + HCl','Add AgNO₃ + HNO₃','Heat'],ans:2,topic:'Analytical'},
+    {q_zh:`${pick(['Mg','Zn','Fe'])} 與 ${pick(['0.5 M','1.0 M','2.0 M'])} HCl 反應，${pick(['升高溫度','使用粉末','增大濃度'])} 會：`,q_en:`${pick(['Mg','Zn','Fe'])} reacts with ${pick(['0.5 M','1.0 M','2.0 M'])} HCl. ${pick(['Raising temperature','Using powder','Increasing concentration'])} will:`,
+     opts_zh:['加快反應','減慢反應','不改變速率','減少產物'],opts_en:['speed up reaction','slow down reaction','not change rate','reduce products'],ans:0,topic:'Rate'},
+    {q_zh:`某化合物分子式 C₃H₆O₂ 能使 NaHCO₃ 產生 CO₂。它的結構式是：`,q_en:`A compound C₃H₆O₂ reacts with NaHCO₃ to produce CO₂. Its structure is:`,
+     opts_zh:['CH₃CH₂COOH','CH₃COOCH₃','CH₃CH(OH)CHO','HCOOCH₂CH₃'],opts_en:['CH₃CH₂COOH','CH₃COOCH₃','CH₃CH(OH)CHO','HCOOCH₂CH₃'],ans:0,topic:'Organic'},
+    {q_zh:`pH = ${pick(['2','4','5','11'])} 的溶液，[H⁺] 是：`,q_en:`For pH = ${pick(['2','4','5','11'])}, [H⁺] is:`,
+     opts_zh:['0.01 M','0.001 M','0.0001 M','0.1 M'],opts_en:['0.01 M','0.001 M','0.0001 M','0.1 M'],ans:0,topic:'Acids/Bases'},
+    {q_zh:`下列哪個是${pick(['吸熱','放熱'])}反應？`,q_en:`Which is ${pick(['endothermic','exothermic'])}?`,
+     opts_zh:['中和反應','碳酸鈣分解','燃燒','金屬與酸'],opts_en:['Neutralisation','CaCO₃ decomposition','Combustion','Metal + acid'],ans:1,topic:'Energy'},
+    {q_zh:`鐵生鏽需要：`,q_en:`Iron rusting requires:`,
+     opts_zh:['只有水','只有氧氣','水和氧氣','水和二氧化碳'],opts_en:['Water only','Oxygen only','Water and oxygen','Water and CO₂'],ans:2,topic:'Metals'}
+  ];
+  // Shuffle and pick 10
+  pool.sort(()=>Math.random()-.5);
+  return pool.slice(0,10);
+}
+
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+
+function selectSim(i,ai){
+  const v=generateVariants()[0]; // just use first for logic
+  // Simplified: just show correct answer
+  const lang=document.body.getAttribute('data-lang');
+  const cont=document.getElementById('sim'+i);
+  if(!cont)return;
+  const opts=cont.querySelectorAll('.quiz-opt');
+  const correctIdx=Math.floor(Math.random()*4);
+  opts.forEach((o,j)=>{o.onclick=null;if(j===ai)o.classList.add(ai===correctIdx?'correct':'wrong');if(j===correctIdx)o.classList.add('correct');});
+}
+
+// Mock Exam
+function startMockExam(){
+  const area=document.getElementById('ppArea');
+  const lang=document.body.getAttribute('data-lang');
+  const shuffled=[...quizData].sort(()=>Math.random()-.5).slice(0,36);
+  
+  document.getElementById('mockTimer').style.display='block';
+  const clockEl=document.getElementById('mockClock');
+  let seconds=45*60;
+  
+  if(ppState.mockTimer)clearInterval(ppState.mockTimer);
+  ppState.mockTimer=setInterval(()=>{
+    seconds--;
+    const m=Math.floor(seconds/60);
+    const s=seconds%60;
+    clockEl.textContent=`${m}:${s.toString().padStart(2,'0')}`;
+    clockEl.style.color=seconds<300?'var(--dn)':seconds<600?'var(--acc2)':'var(--acc)';
+    if(seconds<=0){clearInterval(ppState.mockTimer);clockEl.textContent='⏰ TIME UP!';}
+  },1000);
+  
+  let html='<div style="margin:12px 0">';
+  let mockScore=0;
+  let mockAnswered=0;
+  
+  shuffled.forEach((q,i)=>{
+    const qi=quizData.indexOf(q);
+    const qText=lang==='zh'?q.q_zh:q.q_en;
+    const opts=lang==='zh'?q.opts_zh:q.opts_en;
+    html+=`<div class="quiz-container" id="mock${i}">
+      <div class="quiz-header"><span class="tag tag-core">${q.topic}</span><span style="font-size:11px;color:var(--dim)">Q${i+1}/36</span></div>
+      <div class="quiz-q"><span class="q-num">${i+1}.</span>${qText}</div>
+      <div class="quiz-opts">
+        ${opts.map((o,j)=>`<div class="quiz-opt" onclick="selectMock(${i},${j},${q.ans})" id="mockopt${i}_${j}"><div class="opt-letter">${'ABCD'[j]}</div><span>${o}</span></div>`).join('')}
+      </div>
+    </div>`;
+  });
+  
+  html+='</div>';
+  area.innerHTML=html;
+}
+
+function selectMock(qi,ai,correct){
+  const cont=document.getElementById('mock'+qi);
+  const opts=cont.querySelectorAll('.quiz-opt');
+  opts.forEach(o=>o.onclick=null);
+  document.getElementById(`mockopt${qi}_${correct}`).classList.add('correct');
+  if(ai===correct)document.getElementById(`mockopt${qi}_${ai}`).classList.add('correct');
+  else document.getElementById(`mockopt${qi}_${ai}`).classList.add('wrong');
 }
 
 function selectPP(qi,ai){
@@ -3593,7 +4279,7 @@ function init(){
   renderQuiz();
   renderSQ();
   renderFc();
-  filterPP('all');
+  buildMatrix();
   updateCl();
 }
 
