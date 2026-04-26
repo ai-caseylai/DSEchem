@@ -261,6 +261,13 @@ footer{text-align:center;padding:30px 16px;color:var(--dim);font-size:11px;borde
 .ai-modal-input input:focus{border-color:var(--pri)}
 .ai-modal-input button{background:var(--pri);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer;font-size:13px}
 .ai-modal-input button:hover{opacity:.9}
+.ai-loading-dots{display:inline-flex;gap:4px;align-items:center}
+.ai-loading-dots span{font-size:10px;color:var(--pri-l);animation:aiDotBounce 1.2s infinite}
+.ai-loading-dots span:nth-child(2){animation-delay:.2s}
+.ai-loading-dots span:nth-child(3){animation-delay:.4s}
+@keyframes aiDotBounce{0%,80%,100%{opacity:.2;transform:scale(.8)}40%{opacity:1;transform:scale(1.2)}}
+.ai-quick-badge{display:inline-block;background:linear-gradient(135deg,var(--acc),#00d2a8);color:#000;font-size:11px;font-weight:800;padding:2px 10px;border-radius:10px;margin-bottom:8px}
+.ai-quick-answer{border-left:3px solid var(--acc);background:rgba(0,184,148,.08)!important}
 
 /* Comic & Blog */
 .comic-strip{display:flex;gap:12px;margin:16px 0;overflow-x:auto;padding:8px 0;scrollbar-width:none}
@@ -285,6 +292,10 @@ footer{text-align:center;padding:30px 16px;color:var(--dim);font-size:11px;borde
 .svg-diagram{background:var(--card2);border-radius:12px;padding:16px;margin:12px 0;overflow-x:auto}
 .svg-diagram svg{max-width:100%;height:auto;display:block;margin:0 auto}
 </style>
+<!-- KaTeX for math rendering -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="window._katexReady=true"></script>
 </head>
 <body data-lang="zh">
 
@@ -296,7 +307,7 @@ footer{text-align:center;padding:30px 16px;color:var(--dim);font-size:11px;borde
 
 <!-- Hero -->
 <div class="hero">
-  <div class="hero-badge">⭐ 2026 DSE Chemistry 5**</div>
+  <div class="hero-badge">⭐ 2026 DSE Chemistry 5** · v0.01</div>
   <h1><span class="zh-only">化學奪星全攻略</span><span class="en-only">Chemistry 5** Masterclass</span></h1>
   <p><span class="zh-only">從零基礎到 5** 的完整學習路線 — 涵蓋全部課題 + 真題練習 + 互動教學</span><span class="en-only">From zero to 5** — Complete roadmap with real exam practice & interactive learning</span></p>
   <div class="hero-stats">
@@ -4676,14 +4687,21 @@ let aiModalHistory=[];
 const AI_SYS_PROMPT=`You are an expert DSE Chemistry tutor. You teach Hong Kong DSE Chemistry (HKDSE) at the highest level (5**).
 Rules:
 - Answer in the same language as the student's question (Chinese or English)
-- Be detailed but clear. Use bullet points and numbered steps.
-- Include relevant chemical equations.
+- Be EXTREMELY detailed and thorough. Never leave a concept half-explained.
+- When you mention any chemistry term or concept (e.g. electrochemical series, oxidizing agent, mole), ALWAYS pause and explain what it means before continuing. Treat the student as someone who needs every concept spelled out.
+- Use bullet points, numbered steps, and sub-headings for clarity.
+- Include ALL relevant chemical equations with state symbols.
+- Use LaTeX math formatting for all chemical formulas and equations: inline math like $\\text{Cu}^{2+}$ and display math like $$\\text{CuSO}_4(aq) + \\text{Zn}(s) \\rightarrow \\text{ZnSO}_4(aq) + \\text{Cu}(s)$$
+- Use $\\text{C}_n\\text{H}_{2n+2}$ style for general formulas, NOT CnH2n+2.
 - Give real DSE exam tips when appropriate.
 - Keep formatting clean with markdown-style formatting.
+- IMPORTANT: For MC questions, you MUST explain EVERY option (A, B, C, D) in detail — not just the correct one. For each wrong option, explain exactly WHY it is wrong.
+- IMPORTANT: Whenever you reference a chemistry principle (e.g. reactivity series, preferential discharge, Le Chatelier's principle), explain that principle fully as if teaching it for the first time.
+- IMPORTANT: After explaining the question, add a "📚 延伸知識" section that covers related concepts the student should know for DSE.
 Topics covered: Mole calculations, Chemical bonding, Electrolysis, Chemical equilibrium, Organic chemistry, Rate of reaction, Acids & bases, Redox, Metals, Atomic structure, Periodic table, Industrial chemistry, Energy changes, Separation techniques.`;
 
 async function streamAI(messages, onToken, onDone, onError){
-  const body={model:'glm-5.1',messages:[{role:'system',content:AI_SYS_PROMPT},...messages.slice(-20)],temperature:0.7,max_tokens:2000,stream:true};
+  const body={model:'glm-5.1',messages:[{role:'system',content:AI_SYS_PROMPT},...messages.slice(-20)],temperature:0.7,max_tokens:40000,stream:true};
   try{
     const res=await fetch(AI_URL,{
       method:'POST',
@@ -4691,25 +4709,25 @@ async function streamAI(messages, onToken, onDone, onError){
       body:JSON.stringify(body)
     });
     
-    // 檢查 content-type，如果不是 stream 就用 JSON 模式
-    const ct=res.headers.get('content-type')||'';
-    if(ct.includes('text/event-stream')||ct.includes('octet-stream')){
-      // 流式模式
-      const reader=res.body.getReader();
-      const decoder=new TextDecoder();
-      let fullText='';
-      let buffer='';
-      while(true){
-        const {done,value}=await reader.read();
-        if(done)break;
-        buffer+=decoder.decode(value,{stream:true});
-        const lines=buffer.split('\n');
-        buffer=lines.pop()||'';
-        for(const line of lines){
-          const trimmed=line.trim();
-          if(!trimmed||!trimmed.startsWith('data:'))continue;
+    const reader=res.body.getReader();
+    const decoder=new TextDecoder();
+    let fullText='';
+    let buffer='';
+    let gotSSE=false;
+    
+    while(true){
+      const {done,value}=await reader.read();
+      if(done)break;
+      buffer+=decoder.decode(value,{stream:true});
+      const lines=buffer.split('\n');
+      buffer=lines.pop()||'';  // 保留最後一行（可能不完整）
+      for(const line of lines){
+        const trimmed=line.trim();
+        if(!trimmed)continue;
+        if(trimmed.startsWith('data:')){
+          gotSSE=true;
           const data=trimmed.slice(5).trim();
-          if(data==='[DONE]')break;
+          if(data==='[DONE]')continue;
           try{
             const json=JSON.parse(data);
             const token=json.choices?.[0]?.delta?.content;
@@ -4717,27 +4735,53 @@ async function streamAI(messages, onToken, onDone, onError){
           }catch(e){}
         }
       }
-      if(fullText){onDone(fullText);}
-      else{
-        // 流式讀不到內容，fallback 到 JSON
+    }
+    
+    // 處理 buffer 中剩餘的資料
+    if(buffer.trim()){
+      if(gotSSE){
+        // 最後一段 SSE data
+        const trimmed=buffer.trim();
+        if(trimmed.startsWith('data:')){
+          const data=trimmed.slice(5).trim();
+          if(data!=='[DONE]'){
+            try{
+              const json=JSON.parse(data);
+              const token=json.choices?.[0]?.delta?.content;
+              if(token){fullText+=token;onToken(fullText);}
+            }catch(e){}
+          }
+        }
+      }else{
+        // 整段是 JSON（非串流回應）
+        buffer+=decoder.decode();  // flush
+      }
+    }
+    
+    if(fullText){
+      onDone(fullText);
+    }else if(!gotSSE){
+      // 完全不是 SSE 格式，嘗試整段解析 JSON
+      try{
+        const data=JSON.parse(buffer);
+        const reply=data.choices?.[0]?.message?.content||'';
+        if(reply){
+          let display='';
+          for(let i=0;i<reply.length;i++){
+            display+=reply[i];
+            onToken(display);
+            if(i%3===0)await new Promise(r=>setTimeout(r,15));
+          }
+          onDone(reply);
+        }else{
+          onError(new Error('Empty response'));
+        }
+      }catch(e){
         await fetchAIJson(messages,onToken,onDone,onError);
       }
     }else{
-      // 非 stream response，直接解析 JSON
-      const data=await res.json();
-      const reply=data.choices?.[0]?.message?.content||'';
-      if(reply){
-        // 模擬逐字輸出效果
-        let display='';
-        for(let i=0;i<reply.length;i++){
-          display+=reply[i];
-          onToken(display);
-          if(i%3===0)await new Promise(r=>setTimeout(r,15));
-        }
-        onDone(reply);
-      }else{
-        onError(new Error('Empty response'));
-      }
+      // SSE 模式但沒收到內容，fallback
+      await fetchAIJson(messages,onToken,onDone,onError);
     }
   }catch(e){
     onError(e);
@@ -4750,7 +4794,7 @@ async function fetchAIJson(messages, onToken, onDone, onError){
     const res=await fetch(AI_URL,{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+AI_KEY},
-      body:JSON.stringify({model:'glm-5.1',messages:[{role:'system',content:AI_SYS_PROMPT},...messages.slice(-20)],temperature:0.7,max_tokens:2000})
+      body:JSON.stringify({model:'glm-5.1',messages:[{role:'system',content:AI_SYS_PROMPT},...messages.slice(-20)],temperature:0.7,max_tokens:40000})
     });
     const data=await res.json();
     const reply=data.choices?.[0]?.message?.content||'';
@@ -4800,9 +4844,34 @@ function askAIAboutQuestion(qi){
   document.getElementById('aiModalOverlay').classList.add('open');
   document.body.style.overflow='hidden';
   
-  // 構建 prompt
-  const prompt=lang==='zh'
-    ?`請針對以下 DSE 化學 MC 題目，一步一步詳細解釋：
+  const msgs=document.getElementById('aiModalMsgs');
+
+  // ===== Phase 1: 快速答案（低 token，極速回應）=====
+  const quickPrompt=lang==='zh'
+    ?`這條 DSE 化學 MC 題的正確答案是 ${correctLetter}。請用 2-3 句話簡短說明為什麼 ${correctLetter} 正確。不要廢話，直接講重點。`
+    :`The correct answer to this DSE Chemistry MC question is ${correctLetter}. Briefly explain why in 2-3 sentences. Be concise.`;
+
+  const quickMsgId='mq_'+Date.now();
+  msgs.innerHTML+=`<div class="ai-msg bot ai-quick-answer" id="${quickMsgId}">🧪 <span class="ai-loading-dots"><span>●</span><span>●</span><span>●</span></span></div>`;
+  msgs.scrollTop=msgs.scrollHeight;
+  const quickEl=document.getElementById(quickMsgId);
+
+  // 快速請求：低 max_tokens，不stream，直接拿結果
+  fetch(AI_URL,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+AI_KEY},
+    body:JSON.stringify({model:'glm-5.1',messages:[{role:'system',content:'You are a DSE Chemistry tutor. Answer concisely in 2-3 sentences.'},{role:'user',content:quickPrompt}],temperature:0.5,max_tokens:300})
+  }).then(r=>r.json()).then(data=>{
+    const reply=data.choices?.[0]?.message?.content||'';
+    if(reply){
+      quickEl.innerHTML=`<div class="ai-quick-badge">⚡ ${lang==='zh'?'快速答案':'Quick Answer'}</div>` + formatAI(reply);
+      msgs.scrollTop=msgs.scrollHeight;
+    }
+  }).catch(()=>{});
+
+  // ===== Phase 2: 詳細解釋（串流，完整分析）=====
+  const detailPrompt=lang==='zh'
+    ?`請針對以下 DSE 化學 MC 題目，進行**超級詳細**的一步一步一步解釋：
 
 📖 題目（課題：${topic}${year?' · DSE '+year:''}）：
 ${qText}
@@ -4813,12 +4882,25 @@ ${optionsText}
 ✅ 正確答案：${correctLetter}
 
 請按以下格式回答：
-1. **先講正確答案是什麼**，為什麼正確
-2. **逐一分析每個選項**，解釋對或錯的原因
-3. **背後的化學概念**是什麼（用簡單方式講解）
-4. **DSE 考試貼士**：這類題目的常見陷阱和記憶技巧
-5. 如果有相關的化學方程式，請列出來`
-    :`Please explain this DSE Chemistry MC question step by step:
+
+### ✅ 正確答案與原因
+先講正確答案是什麼，為什麼正確。**每個提到的化學概念都要當作學生第一次聽到一樣解釋清楚。**
+
+### 📝 逐項分析（A/B/C/D 全部都要講）
+逐一分析**每一個選項**（A、B、C、D），解釋為什麼對或為什麼錯。**不能跳過任何一個選項。**
+
+### 🔬 背後化學原理
+詳細講解這道題涉及的化學原理。如果提到「活動性順序」「氧化劑」「放電次序」等概念，**請完整解釋該概念**（例如列出完整的活動性順序表，解釋什麼是氧化劑和還原劑等）。
+
+### ⚗️ 相關化學方程式
+列出所有相關的化學方程式（含態符號），並逐一解釋每個方程式的含義。
+
+### 🎯 DSE 考試貼士
+這類題目的常見陷阱、出題模式、記憶技巧。
+
+### 📚 延伸知識
+這道題背後還有哪些學生應該知道的相關知識點？列出來並簡要說明。`
+    :`Please explain this DSE Chemistry MC question in **extreme detail**, step by step:
 
 📖 Question (Topic: ${topic}${year?' · DSE '+year:''}):
 ${qText}
@@ -4829,28 +4911,39 @@ ${optionsText}
 ✅ Correct Answer: ${correctLetter}
 
 Please answer in this format:
-1. **State the correct answer** and why it's correct
-2. **Analyze each option** — explain why each is right or wrong
-3. **Underlying chemistry concept** (explain in simple terms)
-4. **DSE exam tips**: common traps and memory techniques for this type
-5. Include relevant chemical equations if applicable`;
+
+### ✅ Correct Answer & Reasoning
+State the correct answer and explain why. **Explain every chemistry concept mentioned as if the student is hearing it for the first time.**
+
+### 📝 Option-by-Option Analysis (ALL of A/B/C/D)
+Analyze **EVERY option** (A, B, C, D). Explain why each is correct or wrong. **Do NOT skip any option.**
+
+### 🔬 Underlying Chemistry Principles
+Explain the chemistry principles in full detail. If you mention concepts like "reactivity series", "oxidizing agent", "discharge priority", **explain that concept completely** (e.g. list the full reactivity series, define what oxidizing/reducing agents are, etc.).
+
+### ⚗️ Relevant Chemical Equations
+List ALL relevant chemical equations (with state symbols) and explain each one.
+
+### 🎯 DSE Exam Tips
+Common traps, question patterns, and memory techniques for this type of question.
+
+### 📚 Extended Knowledge
+What other related knowledge points should the student know? List and briefly explain each.`;
   
-  aiModalHistory.push({role:'user',content:prompt});
+  aiModalHistory.push({role:'user',content:detailPrompt});
   
-  const msgs=document.getElementById('aiModalMsgs');
-  const botMsgId='mbot_'+Date.now();
-  msgs.innerHTML+=`<div class="ai-msg bot" id="${botMsgId}">🧪</div>`;
+  const detailMsgId='md_'+Date.now();
+  msgs.innerHTML+=`<div class="ai-msg bot" id="${detailMsgId}">📖 <span class="zh-only">詳細分析載入中</span><span class="en-only">Loading detailed analysis</span> <span class="ai-loading-dots"><span>●</span><span>●</span><span>●</span></span></div>`;
   msgs.scrollTop=msgs.scrollHeight;
   
-  const botEl=document.getElementById(botMsgId);
+  const detailEl=document.getElementById(detailMsgId);
   
   streamAI(aiModalHistory,
-    (text)=>{botEl.innerHTML=formatAI(text);msgs.scrollTop=msgs.scrollHeight;},
+    (text)=>{detailEl.innerHTML=formatAI(text);msgs.scrollTop=msgs.scrollHeight;},
     (fullText)=>{aiModalHistory.push({role:'assistant',content:fullText});},
-    ()=>{botEl.innerHTML='⚠️ 網絡錯誤，請重試';}
+    ()=>{detailEl.innerHTML='⚠️ 網絡錯誤，請重試';}
   );
 }
-
 function closeAIModal(){
   document.getElementById('aiModalOverlay').classList.remove('open');
   document.body.style.overflow='';
@@ -4867,7 +4960,7 @@ function aiModalSend(){
   aiModalHistory.push({role:'user',content:msg});
   
   const botMsgId='mbot_'+Date.now();
-  msgs.innerHTML+=`<div class="ai-msg bot" id="${botMsgId}">🧪</div>`;
+  msgs.innerHTML+=`<div class="ai-msg bot" id="${botMsgId}">🧪 <span class="ai-loading-dots"><span>●</span><span>●</span><span>●</span></span></div>`;
   msgs.scrollTop=msgs.scrollHeight;
   
   const botEl=document.getElementById(botMsgId);
@@ -4942,11 +5035,39 @@ Topics covered: Mole calculations, Chemical bonding, Electrolysis, Chemical equi
 
 function escHtml(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 function formatAI(t){
-  return escHtml(t)
+  // 先保護 LaTeX 區段，避免被 escHtml 或其他 replace 破壞
+  const latexBlocks=[];
+  // 保護 $$...$$ (display math)
+  t=t.replace(/\$\$([\s\S]*?)\$\$/g,(m,p1)=>{const i=latexBlocks.length;latexBlocks.push({display:true,tex:p1});return `%%LATEX_${i}%%`;});
+  // 保護 $...$ (inline math)
+  t=t.replace(/\$([^\$\n]+?)\$/g,(m,p1)=>{const i=latexBlocks.length;latexBlocks.push({display:false,tex:p1});return `%%LATEX_${i}%%`;});
+  
+  // 基本格式轉換
+  t=escHtml(t)
     .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
     .replace(/```(\w*)\n?([\s\S]*?)```/g,'<div style="background:rgba(255,255,255,.05);padding:10px;border-radius:8px;margin:6px 0;font-size:12px;font-family:monospace;overflow-x:auto">$2</div>')
     .replace(/`(.*?)`/g,'<code style="background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px;font-size:12px">$1</code>')
     .replace(/\n/g,'<br>');
+  
+  // 還原並渲染 LaTeX
+  for(let i=0;i<latexBlocks.length;i++){
+    const block=latexBlocks[i];
+    let rendered='';
+    try{
+      if(window.katex){
+        rendered=katex.renderToString(block.tex,{displayMode:block.display,throwOnError:false,trust:true});
+      }else{
+        // KaTeX 未載入時的 fallback：顯示美化純文字
+        rendered=block.display
+          ?`<div style="text-align:center;font-style:italic;color:var(--pri-l);margin:8px 0">${escHtml(block.tex)}</div>`
+          :`<span style="font-style:italic;color:var(--pri-l)">${escHtml(block.tex)}</span>`;
+      }
+    }catch(e){
+      rendered=escHtml(block.tex);
+    }
+    t=t.replace(`%%LATEX_${i}%%`,rendered);
+  }
+  return t;
 }
 
 // Show/hide floating AI button based on active tab
