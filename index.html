@@ -4672,6 +4672,54 @@ let aiHistory=[];
 // 「問 AI」按鈕：針對某條題目打開 AI 對話盒並自動發問
 let aiModalHistory=[];
 
+// 流式 AI 請求（通用）
+const AI_SYS_PROMPT=`You are an expert DSE Chemistry tutor. You teach Hong Kong DSE Chemistry (HKDSE) at the highest level (5**).
+Rules:
+- Answer in the same language as the student's question (Chinese or English)
+- Be detailed but clear. Use bullet points and numbered steps.
+- Include relevant chemical equations.
+- Give real DSE exam tips when appropriate.
+- Keep formatting clean with markdown-style formatting.
+Topics covered: Mole calculations, Chemical bonding, Electrolysis, Chemical equilibrium, Organic chemistry, Rate of reaction, Acids & bases, Redox, Metals, Atomic structure, Periodic table, Industrial chemistry, Energy changes, Separation techniques.`;
+
+async function streamAI(messages, onToken, onDone, onError){
+  try{
+    const res=await fetch(AI_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+AI_KEY},
+      body:JSON.stringify({model:'glm-5.1',messages:[{role:'system',content:AI_SYS_PROMPT},...messages.slice(-20)],temperature:0.7,max_tokens:2000,stream:true})
+    });
+    const reader=res.body.getReader();
+    const decoder=new TextDecoder();
+    let fullText='';
+    let buffer='';
+    while(true){
+      const {done,value}=await reader.read();
+      if(done)break;
+      buffer+=decoder.decode(value,{stream:true});
+      const lines=buffer.split('\n');
+      buffer=lines.pop()||'';
+      for(const line of lines){
+        const trimmed=line.trim();
+        if(!trimmed||!trimmed.startsWith('data:'))continue;
+        const data=trimmed.slice(5).trim();
+        if(data==='[DONE]')break;
+        try{
+          const json=JSON.parse(data);
+          const token=json.choices?.[0]?.delta?.content;
+          if(token){
+            fullText+=token;
+            onToken(fullText);
+          }
+        }catch(e){}
+      }
+    }
+    onDone(fullText);
+  }catch(e){
+    onError(e);
+  }
+}
+
 function askAIAboutQuestion(qi){
   const q=quizData[qi];
   if(!q)return;
@@ -4695,7 +4743,7 @@ function askAIAboutQuestion(qi){
   
   // 清空對話
   aiModalHistory=[];
-  document.getElementById('aiModalMsgs').innerHTML=`<div class="ai-msg bot"><span class="zh-only">🧪 正在分析這條題目，請稍候...</span><span class="en-only">🧪 Analyzing this question, please wait...</span></div>`;
+  document.getElementById('aiModalMsgs').innerHTML='';
   document.getElementById('aiModalInput').value='';
   
   // 打開 modal
@@ -4737,43 +4785,20 @@ Please answer in this format:
 4. **DSE exam tips**: common traps and memory techniques for this type
 5. Include relevant chemical equations if applicable`;
   
-  // 發送給 AI
   aiModalHistory.push({role:'user',content:prompt});
   
-  const sysPrompt=`You are an expert DSE Chemistry tutor. You teach Hong Kong DSE Chemistry (HKDSE) at the highest level (5**).
-Rules:
-- Answer in the same language as the student's question (Chinese or English)
-- Be detailed but clear. Use bullet points and numbered steps.
-- Include relevant chemical equations.
-- Give real DSE exam tips when appropriate.
-- Keep formatting clean with markdown-style formatting.
-Topics covered: Mole calculations, Chemical bonding, Electrolysis, Chemical equilibrium, Organic chemistry, Rate of reaction, Acids & bases, Redox, Metals, Atomic structure, Periodic table, Industrial chemistry, Energy changes, Separation techniques.`;
-
   const msgs=document.getElementById('aiModalMsgs');
-  const typingId='mtype_'+Date.now();
-  msgs.innerHTML+=`<div class="ai-typing" id="${typingId}" style="font-size:12px;color:var(--dim);padding:4px 12px;align-self:flex-start"><span>●</span><span>●</span><span>●</span></div>`;
+  const botMsgId='mbot_'+Date.now();
+  msgs.innerHTML+=`<div class="ai-msg bot" id="${botMsgId}">🧪</div>`;
   msgs.scrollTop=msgs.scrollHeight;
-
-  fetch(AI_URL,{
-    method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer '+AI_KEY},
-    body:JSON.stringify({model:'glm-5.1',messages:[{role:'system',content:sysPrompt},...aiModalHistory.slice(-20)],temperature:0.7,max_tokens:2000})
-  })
-  .then(r=>r.json())
-  .then(data=>{
-    const el=document.getElementById(typingId);
-    if(el)el.remove();
-    const reply=data.choices?.[0]?.message?.content||'抱歉，暫時無法回應。請再試一次。';
-    aiModalHistory.push({role:'assistant',content:reply});
-    msgs.innerHTML+=`<div class="ai-msg bot">${formatAI(reply)}</div>`;
-    msgs.scrollTop=msgs.scrollHeight;
-  })
-  .catch(()=>{
-    const el=document.getElementById(typingId);
-    if(el)el.remove();
-    msgs.innerHTML+=`<div class="ai-msg bot">⚠️ 網絡錯誤，請檢查連接後重試。</div>`;
-    msgs.scrollTop=msgs.scrollHeight;
-  });
+  
+  const botEl=document.getElementById(botMsgId);
+  
+  streamAI(aiModalHistory,
+    (text)=>{botEl.innerHTML=formatAI(text);msgs.scrollTop=msgs.scrollHeight;},
+    (fullText)=>{aiModalHistory.push({role:'assistant',content:fullText});},
+    ()=>{botEl.innerHTML+='⚠️ 網絡錯誤，請重試';}
+  );
 }
 
 function closeAIModal(){
@@ -4790,38 +4815,18 @@ function aiModalSend(){
   msgs.innerHTML+=`<div class="ai-msg user">${escHtml(msg)}</div>`;
   msgs.scrollTop=msgs.scrollHeight;
   aiModalHistory.push({role:'user',content:msg});
-
-  const sysPrompt=`You are an expert DSE Chemistry tutor. You teach Hong Kong DSE Chemistry (HKDSE) at the highest level (5**).
-Rules:
-- Answer in the same language as the student's question (Chinese or English)
-- Be detailed but clear. Use bullet points and numbered steps.
-- Include relevant chemical equations.
-- Give real DSE exam tips when appropriate.`;
-
-  const typingId='mtype_'+Date.now();
-  msgs.innerHTML+=`<div class="ai-typing" id="${typingId}" style="font-size:12px;color:var(--dim);padding:4px 12px;align-self:flex-start"><span>●</span><span>●</span><span>●</span></div>`;
+  
+  const botMsgId='mbot_'+Date.now();
+  msgs.innerHTML+=`<div class="ai-msg bot" id="${botMsgId}">🧪</div>`;
   msgs.scrollTop=msgs.scrollHeight;
-
-  fetch(AI_URL,{
-    method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer '+AI_KEY},
-    body:JSON.stringify({model:'glm-5.1',messages:[{role:'system',content:sysPrompt},...aiModalHistory.slice(-20)],temperature:0.7,max_tokens:2000})
-  })
-  .then(r=>r.json())
-  .then(data=>{
-    const el=document.getElementById(typingId);
-    if(el)el.remove();
-    const reply=data.choices?.[0]?.message?.content||'抱歉，暫時無法回應。';
-    aiModalHistory.push({role:'assistant',content:reply});
-    msgs.innerHTML+=`<div class="ai-msg bot">${formatAI(reply)}</div>`;
-    msgs.scrollTop=msgs.scrollHeight;
-  })
-  .catch(()=>{
-    const el=document.getElementById(typingId);
-    if(el)el.remove();
-    msgs.innerHTML+=`<div class="ai-msg bot">⚠️ 網絡錯誤</div>`;
-    msgs.scrollTop=msgs.scrollHeight;
-  });
+  
+  const botEl=document.getElementById(botMsgId);
+  
+  streamAI(aiModalHistory,
+    (text)=>{botEl.innerHTML=formatAI(text);msgs.scrollTop=msgs.scrollHeight;},
+    (fullText)=>{aiModalHistory.push({role:'assistant',content:fullText});},
+    ()=>{botEl.innerHTML+='⚠️ 網絡錯誤';}
+  );
 }
 
 function aiSend(){
