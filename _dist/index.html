@@ -4925,7 +4925,7 @@ async function fetchAIJson(messages, onToken, onDone, onError){
   }
 }
 
-async function askAIAboutQuestion(qi){
+function askAIAboutQuestion(qi){
   const q=quizData[qi];
   if(!q)return;
   const lang=document.body.getAttribute('data-lang');
@@ -4957,70 +4957,6 @@ async function askAIAboutQuestion(qi){
   
   const msgs=document.getElementById('aiModalMsgs');
 
-  // ===== 計算 hash（用題目+選項+答案+語言做唯一標識）=====
-  const cacheKey=`${qText}|${optionsText}|${correctLetter}`;
-  // 簡單 hash 函數
-  function simpleHash(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return h.toString(36);}
-  const qHash=simpleHash(cacheKey);
-
-  // ===== 先查 AI Cache =====
-  const cacheMsgId='mc_'+Date.now();
-  msgs.innerHTML+=`<div class="ai-msg bot" id="${cacheMsgId}">🔍 <span class="zh-only">查詢資料庫中</span><span class="en-only">Querying cache</span> <span class="ai-loading-dots"><span>●</span><span>●</span><span>●</span></span></div>`;
-  msgs.scrollTop=msgs.scrollHeight;
-  const cacheEl=document.getElementById(cacheMsgId);
-
-  let cachedData=null;
-  try{
-    const cacheRes=await fetch(`${API_BASE}/api/aicache?qi=${qi}&lang=${lang}&hash=${qHash}`);
-    const cacheJson=await cacheRes.json();
-    if(cacheJson.cached){
-      cachedData=cacheJson;
-      // 直接顯示快取答案！超快！
-      cacheEl.innerHTML=`<div class="ai-quick-badge">⚡ ${lang==='zh'?'資料庫命中':'Cache Hit'}</div>`;
-      
-      // Phase 1: 快速答案
-      if(cachedData.quick_answer){
-        msgs.innerHTML+=`<div class="ai-msg bot ai-quick-answer"><div class="ai-quick-badge">⚡ ${lang==='zh'?'快速答案':'Quick Answer'}</div>${formatAI(cachedData.quick_answer)}</div>`;
-      }
-      
-      // Phase 2: 詳細答案（直接顯示，模擬打字效果）
-      if(cachedData.detail_answer){
-        const detailMsgId='md_'+Date.now();
-        msgs.innerHTML+=`<div class="ai-msg bot" id="${detailMsgId}"></div>`;
-        const detailEl=document.getElementById(detailMsgId);
-        const reply=cachedData.detail_answer;
-        let display='';
-        for(let i=0;i<reply.length;i+=2){
-          display+=reply.slice(i,i+2);
-          detailEl.innerHTML=formatAI(display);
-          msgs.scrollTop=msgs.scrollHeight;
-          await new Promise(r=>setTimeout(r,8));
-        }
-        // 如果有 thinking 且 toggle 開著
-        if(cachedData.reasoning){
-          const thinkingId='mt_'+Date.now();
-          const thinkingDiv=document.createElement('div');
-          thinkingDiv.className='ai-thinking-block';
-          thinkingDiv.id=thinkingId;
-          thinkingDiv.innerHTML='💭 <strong>'+(lang==='zh'?'思考過程':'Thinking')+'</strong>\n'+formatAI(cachedData.reasoning);
-          msgs.insertBefore(thinkingDiv,detailEl);
-          if(document.getElementById('showThinking').checked)thinkingDiv.classList.add('visible');
-        }
-        aiModalHistory.push({role:'user',content:cacheKey});
-        aiModalHistory.push({role:'assistant',content:reply});
-      }
-      
-      msgs.scrollTop=msgs.scrollHeight;
-      return; // 不需要呼叫 AI！
-    }else{
-      cacheEl.remove(); // 沒命中，移除提示
-    }
-  }catch(e){
-    cacheEl.remove(); // cache 查詢失敗，繼續正常流程
-  }
-
-  // ===== 沒有 cache，走正常 AI 流程 =====
-
   // ===== Phase 1: 快速答案（低 token，極速回應）=====
   const quickPrompt=lang==='zh'
     ?`這條 DSE 化學 MC 題的正確答案是 ${correctLetter}。請用 2-3 句話簡短說明為什麼 ${correctLetter} 正確。不要廢話，直接講重點。`
@@ -5032,7 +4968,6 @@ async function askAIAboutQuestion(qi){
   const quickEl=document.getElementById(quickMsgId);
 
   // 快速請求：低 max_tokens，不stream，直接拿結果
-  let quickReply='';
   fetch(AI_URL,{
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+AI_KEY},
@@ -5041,7 +4976,6 @@ async function askAIAboutQuestion(qi){
     const msg=data.choices?.[0]?.message||{};
     const reply=msg.content||msg.reasoning_content||'';
     if(reply){
-      quickReply=reply;
       quickEl.innerHTML=`<div class="ai-quick-badge">⚡ ${lang==='zh'?'快速答案':'Quick Answer'}</div>` + formatAI(reply);
       msgs.scrollTop=msgs.scrollHeight;
     }
@@ -5117,23 +5051,13 @@ What other related knowledge points should the student know? List and briefly ex
   
   const detailEl=document.getElementById(detailMsgId);
   const thinkingEl=document.getElementById(thinkingId);
-  let detailReasoning='';
   
   streamAI(aiModalHistory,
     (text)=>{detailEl.innerHTML=formatAI(text);msgs.scrollTop=msgs.scrollHeight;},
-    (fullText)=>{
-      aiModalHistory.push({role:'assistant',content:fullText});
-      // 存入 AI cache（靜默，不影響用戶體驗）
-      fetch(`${API_BASE}/api/aicache`,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({question_index:qi,lang:lang,question_hash:qHash,quick_answer:quickReply,detail_answer:fullText,reasoning:detailReasoning})
-      }).catch(()=>{});
-    },
+    (fullText)=>{aiModalHistory.push({role:'assistant',content:fullText});},
     ()=>{detailEl.innerHTML='⚠️ 網絡錯誤，請重試';},
     (reasoning)=>{
       // 更新思考 block
-      detailReasoning=reasoning;
       thinkingEl.innerHTML='💭 <strong>'+(lang==='zh'?'思考過程':'Thinking')+'</strong>\n'+formatAI(reasoning);
       // 如果 toggle 開著就顯示
       if(document.getElementById('showThinking').checked)thinkingEl.classList.add('visible');
