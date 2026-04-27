@@ -315,36 +315,112 @@ footer{text-align:center;padding:30px 16px;color:var(--dim);font-size:11px;borde
 
 <!-- Hero -->
 <div class="hero">
-  <div class="hero-badge">⭐ 2026 DSE Chemistry 5** · v0.01</div>
-  <h1><span class="zh-only">化學奪星全攻略</span><span class="en-only">Chemistry 5** Masterclass</span></h1>
-  <p><span class="zh-only">從零基礎到 5** 的完整學習路線 — 涵蓋全部課題 + 真題練習 + 互動教學</span><span class="en-only">From zero to 5** — Complete roadmap with real exam practice & interactive learning</span></p>
+  <div class="hero-badge">🧪 數字梁Sir · DSE Chemistry 5** · v0.01</div>
+  <h1><span class="zh-only">DSE 化學刷題王</span><span class="en-only">DSE Chem Drill Master</span></h1>
+  <p><span class="zh-only">全港第一個 AI 5** 化學補習老師 — 數字梁Sir陪你刷盡歷屆試題，由做錯到做對，由做對到秒殺 🚀</span><span class="en-only">Hong Kong's First AI 5** Chemistry Tutor — Drill past papers with Digital Leung Sir, from wrong to right, from right to mastery 🚀</span></p>
   <div class="hero-stats">
-    <div class="hero-stat"><div class="num">15</div><div class="label zh-only">課題全覆蓋</div><div class="label en-only">Topics</div></div>
-    <div class="hero-stat"><div class="num">150+</div><div class="label zh-only">MC 真題</div><div class="label en-only">MC Qs</div></div>
-    <div class="hero-stat"><div class="num">25</div><div class="label zh-only">結構題</div><div class="label en-only">SQs</div></div>
-    <div class="hero-stat"><div class="num">42</div><div class="label zh-only">閃卡</div><div class="label en-only">Cards</div></div>
+    <div class="hero-stat"><div class="num" id="heroTotalQ">150+</div><div class="label zh-only">歷屆真題</div><div class="label en-only">Past Paper Qs</div></div>
+    <div class="hero-stat"><div class="num" id="heroDone">0</div><div class="label zh-only">已刷題數</div><div class="label en-only">Drilled</div></div>
+    <div class="hero-stat"><div class="num" id="heroAccuracy">0%</div><div class="label zh-only">正確率</div><div class="label en-only">Accuracy</div></div>
+    <div class="hero-stat"><div class="num" id="heroStreak">0</div><div class="label zh-only">連續正確</div><div class="label en-only">Streak</div></div>
     <div class="hero-stat"><div class="num">5**</div><div class="label zh-only">最終目標</div><div class="label en-only">Target</div></div>
   </div>
 </div>
 
 <!-- Nav -->
 <div class="nav-tabs container" id="navTabs">
-  <button class="nav-tab active" data-tab="roadmap">🗺️<span class="zh-only">路線</span><span class="en-only">Roadmap</span></button>
-  <button class="nav-tab" data-tab="concepts">💡<span class="zh-only">互動概念</span><span class="en-only">Concepts</span></button>
+  <button class="nav-tab active" data-tab="drill">🔥<span class="zh-only">刷題</span><span class="en-only">Drill</span></button>
+  <button class="nav-tab" data-tab="pastpaper">📄<span class="zh-only">歷屆試卷</span><span class="en-only">Past Papers</span></button>
+  <button class="nav-tab" data-tab="wrongbook">📕<span class="zh-only">錯題本</span><span class="en-only">Wrong Book</span></button>
   <button class="nav-tab" data-tab="quiz">📝<span class="zh-only">MC 練習</span><span class="en-only">MC Quiz</span></button>
   <button class="nav-tab" data-tab="sq">✍️<span class="zh-only">結構題</span><span class="en-only">Structured</span></button>
-  <button class="nav-tab" data-tab="pastpaper">📄<span class="zh-only">歷屆試卷</span><span class="en-only">Past Papers</span></button>
   <button class="nav-tab" data-tab="flash">🃏<span class="zh-only">閃卡</span><span class="en-only">Flashcards</span></button>
+  <button class="nav-tab" data-tab="concepts">💡<span class="zh-only">概念</span><span class="en-only">Concepts</span></button>
   <button class="nav-tab" data-tab="phases">📚<span class="zh-only">課題</span><span class="en-only">Topics</span></button>
-  <button class="nav-tab" data-tab="checklist">✅<span class="zh-only">清單</span><span class="en-only">Checklist</span></button>
-  <button class="nav-tab" data-tab="aitutor">🤖<span class="zh-only">AI 老師</span><span class="en-only">AI Tutor</span></button>
-  <button class="nav-tab" data-tab="about">📖<span class="zh-only">博客</span><span class="en-only">Blog</span></button>
+  <button class="nav-tab" data-tab="roadmap">🗺️<span class="zh-only">路線</span><span class="en-only">Roadmap</span></button>
+  <button class="nav-tab" data-tab="aitutor">🤖<span class="zh-only">梁Sir AI</span><span class="en-only">Leung Sir AI</span></button>
+  <button class="nav-tab" data-tab="about">📖<span class="zh-only">關於</span><span class="en-only">About</span></button>
 </div>
 
 <div class="container">
 
+<!-- ===== DRILL (首頁) ===== -->
+<div class="section active" id="drill">
+
+  <!-- 數字梁Sir 歡迎卡 -->
+  <div class="strat" style="border:2px solid var(--gold);background:linear-gradient(135deg,rgba(255,215,0,.05),rgba(108,92,231,.08))">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">
+      <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--pri));display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">🧑‍🏫</div>
+      <div>
+        <div style="font-size:18px;font-weight:900;color:var(--gold)">數字梁Sir</div>
+        <div style="font-size:12px;color:var(--dim)"><span class="zh-only">全港第一個 AI 5** 化學補習老師</span><span class="en-only">HK's First AI 5** Chemistry Tutor</span></div>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--txt);line-height:1.7;margin-bottom:12px"><span class="zh-only">
+      🎯 同學你好！我係<strong style="color:var(--gold)">數字梁Sir</strong>。DSE Chemistry 要攞 5**，秘訣只有一個：<strong style="color:var(--acc)">刷題</strong>。<br>
+      唔係盲目做，而係有策略咁做——做完要分析，錯左要記住，唔明就問我。<br>
+      我會陪你一步一步，由歷屆試題開始，將每一條題目拆到爛為止。Let's go! 🔥
+    </span><span class="en-only">
+      🎯 Welcome! I'm <strong style="color:var(--gold)">Digital Leung Sir</strong>. The secret to DSE Chemistry 5**? <strong style="color:var(--acc)">Drill questions</strong>.<br>
+      Not blindly — but strategically. Analyze every answer, remember every mistake, ask me when confused.<br>
+      I'll guide you step by step through past papers until you master every question. Let's go! 🔥
+    </span></p>
+  </div>
+
+  <!-- 刷題統計 Dashboard -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:20px 0">
+    <div style="background:var(--card);border-radius:12px;padding:14px;text-align:center;border:1px solid var(--bdr)">
+      <div style="font-size:28px;font-weight:900;color:var(--acc)" id="dashDone">0</div>
+      <div style="font-size:11px;color:var(--dim)"><span class="zh-only">已刷題數</span><span class="en-only">Drilled</span></div>
+    </div>
+    <div style="background:var(--card);border-radius:12px;padding:14px;text-align:center;border:1px solid var(--bdr)">
+      <div style="font-size:28px;font-weight:900;color:var(--pri-l)" id="dashAccuracy">0%</div>
+      <div style="font-size:11px;color:var(--dim)"><span class="zh-only">正確率</span><span class="en-only">Accuracy</span></div>
+    </div>
+    <div style="background:var(--card);border-radius:12px;padding:14px;text-align:center;border:1px solid var(--bdr)">
+      <div style="font-size:28px;font-weight:900;color:var(--dn)" id="dashWrong">0</div>
+      <div style="font-size:11px;color:var(--dim)"><span class="zh-only">做錯題數</span><span class="en-only">Wrong</span></div>
+    </div>
+    <div style="background:var(--card);border-radius:12px;padding:14px;text-align:center;border:1px solid var(--bdr)">
+      <div style="font-size:28px;font-weight:900;color:var(--gold)" id="dashMastered">0</div>
+      <div style="font-size:11px;color:var(--dim)"><span class="zh-only">已掌握</span><span class="en-only">Mastered</span></div>
+    </div>
+  </div>
+
+  <!-- 課題刷題進度 -->
+  <div style="font-size:18px;font-weight:900;margin:20px 0 10px">📊 <span class="zh-only">各課題刷題進度</span><span class="en-only">Progress by Topic</span></div>
+  <div id="drillProgress" style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px"></div>
+
+  <!-- 快速開始 -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0">
+    <button onclick="switchTab('pastpaper')" style="background:linear-gradient(135deg,var(--dn),#c0392b);color:#fff;border:none;border-radius:12px;padding:18px;font-size:15px;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px">
+      <span style="font-size:28px">📄</span>
+      <span class="zh-only">歷屆試卷</span><span class="en-only">Past Papers</span>
+    </button>
+    <button onclick="switchTab('quiz')" style="background:linear-gradient(135deg,var(--pri),#4a3f8a);color:#fff;border:none;border-radius:12px;padding:18px;font-size:15px;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px">
+      <span style="font-size:28px">📝</span>
+      <span class="zh-only">MC 刷題</span><span class="en-only">MC Drill</span>
+    </button>
+    <button onclick="switchTab('wrongbook')" style="background:linear-gradient(135deg,var(--acc),#00a884);color:#fff;border:none;border-radius:12px;padding:18px;font-size:15px;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px">
+      <span style="font-size:28px">📕</span>
+      <span class="zh-only">錯題重溫</span><span class="en-only">Wrong Book</span>
+    </button>
+    <button onclick="switchTab('flash')" style="background:linear-gradient(135deg,var(--gold),#f39c12);color:#000;border:none;border-radius:12px;padding:18px;font-size:15px;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px">
+      <span style="font-size:28px">🃏</span>
+      <span class="zh-only">閃卡溫習</span><span class="en-only">Flashcards</span>
+    </button>
+  </div>
+
+  <!-- 5** 目標提醒 -->
+  <div class="callout callout-tip" style="border-left:4px solid var(--gold);background:rgba(255,215,0,.06)">
+    <strong>🏆 <span class="zh-only">5** 目標：MC 至少 32/36</span><span class="en-only">5** Target: MC at least 32/36</span></strong><br>
+    <span class="zh-only">2024 年 5** cutoff 約 80%+。每做錯一條 MC，都要搞清楚點解錯，梁Sir幫你逐條拆解！</span>
+    <span class="en-only">2024 5** cutoff ~80%+. Every wrong MC must be understood — Leung Sir explains each one!</span>
+  </div>
+</div>
+
 <!-- ===== ROADMAP ===== -->
-<div class="section active" id="roadmap">
+<div class="section" id="roadmap">
 
   <!-- Comic Strip Introduction -->
   <div class="comic-strip">
@@ -3243,6 +3319,7 @@ function selectAns(qi,ai){
   }
   document.getElementById(`expl${qi}`).classList.add('show');
   updateMcScore();
+  updateDrillDashboard();
 }
 
 function updateMcScore(){
@@ -4442,6 +4519,7 @@ function selectReviewPP(qi,ai){
     // 重做又錯了，更新錯題本
     recordWrong(qi,ai,'review');
   }
+  updateDrillDashboard();
 }
 
 // Similar Question Generator
@@ -4585,6 +4663,7 @@ function selectPP(qi,ai){
   explDiv.innerHTML=`<h4>💡 <span class="zh-only">解釋</span><span class="en-only">Explanation</span></h4><p>${lang==='zh'?q.exp_zh:q.exp_en}</p>`;
   document.getElementById(`pp${qi}`).appendChild(explDiv);
   updatePPScore();
+  updateDrillDashboard();
 }
 
 function updatePPScore(){
@@ -5145,6 +5224,66 @@ function formatAI(t){
 }
 
 // Show/hide floating AI button based on active tab
+// ===== 刷題 Dashboard 更新 =====
+function updateDrillDashboard(){
+  const wb=loadWrongBook();
+  const logs=JSON.parse(localStorage.getItem('dse_answer_logs')||'[]');
+  const total=logs.length;
+  const correct=logs.filter(l=>l.correct).length;
+  const wrong=wb.length;
+  const mastered=wb.filter(q=>q.mastered).length;
+  const accuracy=total>0?Math.round(correct/total*100):0;
+  
+  // Hero stats
+  const hDone=document.getElementById('heroDone');
+  const hAcc=document.getElementById('heroAccuracy');
+  const hStreak=document.getElementById('heroStreak');
+  if(hDone)hDone.textContent=total;
+  if(hAcc)hAcc.textContent=accuracy+'%';
+  // 計算連續正確
+  let streak=0;
+  for(let i=logs.length-1;i>=0;i--){
+    if(logs[i].correct)streak++;else break;
+  }
+  if(hStreak)hStreak.textContent=streak;
+  
+  // Dashboard cards
+  const dDone=document.getElementById('dashDone');
+  const dAcc=document.getElementById('dashAccuracy');
+  const dWrong=document.getElementById('dashWrong');
+  const dMastered=document.getElementById('dashMastered');
+  if(dDone)dDone.textContent=total;
+  if(dAcc)dAcc.textContent=accuracy+'%';
+  if(dWrong)dWrong.textContent=wrong;
+  if(dMastered)dMastered.textContent=mastered;
+  
+  // 課題進度
+  const topics=[...new Set(quizData.map(q=>q.topic))];
+  const progEl=document.getElementById('drillProgress');
+  if(!progEl)return;
+  let html='';
+  topics.forEach(topic=>{
+    const topicQs=quizData.filter(q=>q.topic===topic);
+    const topicDone=logs.filter(l=>topicQs.some(q=>q.qid===l.qid)).length;
+    const topicCorrect=logs.filter(l=>l.correct&&topicQs.some(q=>q.qid===l.qid)).length;
+    const pct=topicQs.length>0?Math.round(topicDone/topicQs.length*100):0;
+    const accPct=topicDone>0?Math.round(topicCorrect/topicDone*100):0;
+    const barColor=accPct>=80?'var(--acc)':accPct>=50?'var(--gold)':'var(--dn)';
+    html+=`<div style="background:var(--card);border-radius:10px;padding:10px 14px;border:1px solid var(--bdr)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:13px;font-weight:700">${topic}</span>
+        <span style="font-size:11px;color:var(--dim)">${topicDone}/${topicQs.length} · ${accPct}% ✓</span>
+      </div>
+      <div style="background:var(--bdr);border-radius:4px;height:6px;overflow:hidden">
+        <div style="width:${pct}%;height:100%;background:${barColor};border-radius:4px;transition:.3s"></div>
+      </div>
+    </div>`;
+  });
+  progEl.innerHTML=html;
+}
+// 初始化 dashboard
+setTimeout(updateDrillDashboard,200);
+
 const origSwitchTab=switchTab;
 switchTab=function(tab){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
