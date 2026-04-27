@@ -4712,6 +4712,7 @@ async function streamAI(messages, onToken, onDone, onError){
     const reader=res.body.getReader();
     const decoder=new TextDecoder();
     let fullText='';
+    let reasoningText='';
     let buffer='';
     let gotSSE=false;
     
@@ -4720,7 +4721,7 @@ async function streamAI(messages, onToken, onDone, onError){
       if(done)break;
       buffer+=decoder.decode(value,{stream:true});
       const lines=buffer.split('\n');
-      buffer=lines.pop()||'';  // 保留最後一行（可能不完整）
+      buffer=lines.pop()||'';
       for(const line of lines){
         const trimmed=line.trim();
         if(!trimmed)continue;
@@ -4730,8 +4731,19 @@ async function streamAI(messages, onToken, onDone, onError){
           if(data==='[DONE]')continue;
           try{
             const json=JSON.parse(data);
-            const token=json.choices?.[0]?.delta?.content;
-            if(token){fullText+=token;onToken(fullText);}
+            const delta=json.choices?.[0]?.delta;
+            if(delta){
+              // 讀取正式回答內容
+              if(delta.content){fullText+=delta.content;onToken(fullText);}
+              // 讀取思考過程（reasoning），如果沒有正式回答就先顯示思考
+              if(delta.reasoning_content){
+                reasoningText+=delta.reasoning_content;
+                if(!fullText){
+                  // 還在思考階段，顯示思考進度
+                  onToken('💭 '+reasoningText);
+                }
+              }
+            }
           }catch(e){}
         }
       }
@@ -4740,21 +4752,22 @@ async function streamAI(messages, onToken, onDone, onError){
     // 處理 buffer 中剩餘的資料
     if(buffer.trim()){
       if(gotSSE){
-        // 最後一段 SSE data
         const trimmed=buffer.trim();
         if(trimmed.startsWith('data:')){
           const data=trimmed.slice(5).trim();
           if(data!=='[DONE]'){
             try{
               const json=JSON.parse(data);
-              const token=json.choices?.[0]?.delta?.content;
-              if(token){fullText+=token;onToken(fullText);}
+              const delta=json.choices?.[0]?.delta;
+              if(delta){
+                if(delta.content){fullText+=delta.content;}
+                if(delta.reasoning_content && !fullText){reasoningText+=delta.reasoning_content;}
+              }
             }catch(e){}
           }
         }
       }else{
-        // 整段是 JSON（非串流回應）
-        buffer+=decoder.decode();  // flush
+        buffer+=decoder.decode();
       }
     }
     
@@ -4764,7 +4777,8 @@ async function streamAI(messages, onToken, onDone, onError){
       // 完全不是 SSE 格式，嘗試整段解析 JSON
       try{
         const data=JSON.parse(buffer);
-        const reply=data.choices?.[0]?.message?.content||'';
+        const msg=data.choices?.[0]?.message||{};
+        const reply=msg.content||msg.reasoning_content||'';
         if(reply){
           let display='';
           for(let i=0;i<reply.length;i++){
@@ -4779,8 +4793,11 @@ async function streamAI(messages, onToken, onDone, onError){
       }catch(e){
         await fetchAIJson(messages,onToken,onDone,onError);
       }
+    }else if(reasoningText){
+      // SSE 模式，只有 reasoning 沒有 content，把 reasoning 當作回答
+      onDone(reasoningText);
     }else{
-      // SSE 模式但沒收到內容，fallback
+      // SSE 模式但沒收到任何內容，fallback
       await fetchAIJson(messages,onToken,onDone,onError);
     }
   }catch(e){
@@ -4797,7 +4814,8 @@ async function fetchAIJson(messages, onToken, onDone, onError){
       body:JSON.stringify({model:'glm-5.1',messages:[{role:'system',content:AI_SYS_PROMPT},...messages.slice(-20)],temperature:0.7,max_tokens:40000})
     });
     const data=await res.json();
-    const reply=data.choices?.[0]?.message?.content||'';
+    const msg=data.choices?.[0]?.message||{};
+    const reply=msg.content||msg.reasoning_content||'';
     if(reply){
       let display='';
       for(let i=0;i<reply.length;i++){
@@ -4862,7 +4880,8 @@ function askAIAboutQuestion(qi){
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+AI_KEY},
     body:JSON.stringify({model:'glm-5.1',messages:[{role:'system',content:'You are a DSE Chemistry tutor. Answer concisely in 2-3 sentences.'},{role:'user',content:quickPrompt}],temperature:0.5,max_tokens:300})
   }).then(r=>r.json()).then(data=>{
-    const reply=data.choices?.[0]?.message?.content||'';
+    const msg=data.choices?.[0]?.message||{};
+    const reply=msg.content||msg.reasoning_content||'';
     if(reply){
       quickEl.innerHTML=`<div class="ai-quick-badge">⚡ ${lang==='zh'?'快速答案':'Quick Answer'}</div>` + formatAI(reply);
       msgs.scrollTop=msgs.scrollHeight;
@@ -5020,7 +5039,8 @@ Topics covered: Mole calculations, Chemical bonding, Electrolysis, Chemical equi
   .then(data=>{
     const el=document.getElementById(typingId);
     if(el)el.remove();
-    const reply=data.choices?.[0]?.message?.content||'抱歉，暫時無法回應。請再試一次。';
+    const rmsg=data.choices?.[0]?.message||{};
+    const reply=rmsg.content||rmsg.reasoning_content||'抱歉，暫時無法回應。請再試一次。';
     aiHistory.push({role:'assistant',content:reply});
     msgs.innerHTML+=`<div class="ai-msg bot">${formatAI(reply)}</div>`;
     msgs.scrollTop=msgs.scrollHeight;
