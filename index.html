@@ -5093,6 +5093,14 @@ function formatAI(t){
   // 保護 $...$ (inline math)
   t=t.replace(/\$([^\$\n]+?)\$/g,(m,p1)=>{const i=latexBlocks.length;latexBlocks.push({display:false,tex:p1});return `%%LATEX_${i}%%`;});
   
+  // 解析 markdown table → HTML table（在 escHtml 之前）
+  const tableBlocks=[];
+  t=t.replace(/^(\|.+\|)\n(\|[-| :]+\|)\n((?:\|.+\|\n?)*)/gm,(match,header,sep,body)=>{
+    const ti=tableBlocks.length;
+    tableBlocks.push({header,sep,body});
+    return `%%TABLE_${ti}%%`;
+  });
+  
   // 基本格式轉換
   t=escHtml(t)
     .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
@@ -5117,6 +5125,21 @@ function formatAI(t){
       rendered=escHtml(block.tex);
     }
     t=t.replace(`%%LATEX_${i}%%`,rendered);
+  }
+  
+  // 渲染 markdown tables
+  for(let i=0;i<tableBlocks.length;i++){
+    const tb=tableBlocks[i];
+    const parseRow=(row)=>row.split('|').filter(c=>c.trim()!=='').map(c=>c.trim());
+    const headers=parseRow(tb.header);
+    const rows=tb.body.trim().split('\n').filter(r=>r.trim()).map(parseRow);
+    let html='<div style="overflow-x:auto;margin:8px 0"><table style="width:100%;border-collapse:collapse;font-size:12px;background:var(--card)">';
+    html+='<tr>'+headers.map(h=>`<th style="padding:8px 12px;border:1px solid var(--bdr);background:var(--card2);color:var(--gold);font-weight:700;text-align:left">${h}</th>`).join('')+'</tr>';
+    rows.forEach(row=>{
+      html+='<tr>'+row.map(cell=>`<td style="padding:6px 12px;border:1px solid var(--bdr);color:var(--txt)">${cell}</td>`).join('')+'</tr>';
+    });
+    html+='</table></div>';
+    t=t.replace(`%%TABLE_${i}%%`,html);
   }
   return t;
 }
